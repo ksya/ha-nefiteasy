@@ -13,7 +13,7 @@ Restart Home Assistant or Hass.io.
 ## Configuration
 
 ```
-nefit:
+nefiteasy:
   serial: 'XXXXXXXXX'
   accesskey: 'xxxxxxxxx'
   password: 'xxxxxxxxx'
