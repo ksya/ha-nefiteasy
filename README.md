@@ -30,6 +30,6 @@ If any of your secrets in the configuration is numbers only, make sure to put it
 logger:
   default: info
   logs:
-    custom_components.climate.nefit: debug
+    custom_components.nefiteasy: debug
     aionefit: debug
 ```
