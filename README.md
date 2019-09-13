@@ -1,4 +1,4 @@
-# ng-nefiteasy
+# ha-nefiteasy
 Nefit Easy connection for Home Assistant
 
 Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng compontent! 
