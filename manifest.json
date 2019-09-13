@@ -1,0 +1,13 @@
+{
+  "domain": "nefiteasy",
+  "name": "Nefit Easy Bosch Thermostat",
+  "documentation": "https://github.com/ksya/ha-nefiteasy",
+  "dependencies": [],
+  "codeowners": [
+    "@ksya",
+    "@marconfus"
+  ],
+  "requirements": [
+    "aionefit==0.3"
+  ]
+}
