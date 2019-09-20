@@ -33,3 +33,17 @@ logger:
     custom_components.nefiteasy: debug
     aionefit: debug
 ```
+
+## FAQ
+#### HS cannot connect to Bosch cloud 
+
+If you experience errors during the boot of HA regarding the connection to the Bosch cloud ie ```Timeout while connecting to Bosch cloud. Retrying in the background```, you may want to change the OpenSSL configuration.
+The OpenSSL defaults for Buster are causing the problem, probably because Nefit/Bosch is using either an outdated TLS version or an outdated cipher.
+
+Edit ```/etc/ssl/openssl.cnf``` and change the system wide defaults back to their previous values(pre-Buster):
+```
+MinProtocol = None
+CipherString = DEFAULT
+```
+
+https://www.debian.org/releases/stable/amd64/release-notes/ch-information.en.html#openssl-defaults
