@@ -35,7 +35,7 @@ logger:
 ```
 
 ## FAQ
-#### HS cannot connect to Bosch cloud 
+#### HA cannot connect to Bosch cloud 
 
 If you experience errors during the boot of HA regarding the connection to the Bosch cloud ie ```Timeout while connecting to Bosch cloud. Retrying in the background```, you may want to change the OpenSSL configuration.
 The OpenSSL defaults for Buster are causing the problem, probably because Nefit/Bosch is using either an outdated TLS version or an outdated cipher.
