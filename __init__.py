@@ -4,7 +4,7 @@ For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/xxxxxx/
 """
 
-REQUIREMENTS = ['aionefit==0.3']
+REQUIREMENTS = ['aionefit==0.4']
 
 import logging
 import concurrent
@@ -190,11 +190,15 @@ class NefitDevice(Entity):
 
     async def async_update(self):
         """Request latest data."""
-        _LOGGER.debug("async_update called for sensor.%s", self._key)
+        _LOGGER.debug("async_update called for %s", self._key)
         event = self._client.events[self._key]
         event.clear() #clear old event
         self._client.nefit.get(self.get_endpoint())
-        await asyncio.wait_for(event.wait(), timeout=10)
+        try:
+            await asyncio.wait_for(event.wait(), timeout=10)
+        except concurrent.futures._base.TimeoutError:
+            _LOGGER.debug("Did not get an update in time for %s.", self._key)
+            event.clear() #clear event
         
     @property
     def name(self):
