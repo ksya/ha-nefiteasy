@@ -8,15 +8,16 @@ import asyncio
 import logging
 import voluptuous as vol
 
-from homeassistant.helpers import config_validation as cv
 from homeassistant.components.climate import ClimateDevice
 from homeassistant.components.climate.const import (SUPPORT_TARGET_TEMPERATURE, SUPPORT_PRESET_MODE,
     CURRENT_HVAC_IDLE, CURRENT_HVAC_HEAT,
     HVAC_MODE_HEAT)
 from homeassistant.const import TEMP_CELSIUS, ATTR_TEMPERATURE
 from homeassistant.const import STATE_UNKNOWN, EVENT_HOMEASSISTANT_STOP
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from . import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP
+from . import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, DISPATCHER_ON_DEVICE_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ async def async_setup_platform(hass, hass_config, async_add_entities, discovery_
     client = hass.data[DOMAIN]["client"]
     config = hass.data[DOMAIN]["config"]
 
-    async_add_entities([NefitThermostat(client, config)], update_before_add=False)
+    async_add_entities([NefitThermostat(client, config)], update_before_add=True)
     _LOGGER.debug("climate: async_setup_platform done")
 
 
@@ -40,14 +41,34 @@ class NefitThermostat(ClimateDevice):
     def __init__(self, client, config):
         """Initialize the thermostat."""
         self._client = client
-        self.config = config
-
-        self.watch_events = ['/ecus/rrc/uiStatus']
+        self._config = config
+        self._key = 'uistatus'
+        self._url = '/ecus/rrc/uiStatus'
+        client.events[self._key] = asyncio.Event()
+        client.keys[self._url] = self._key
 
         self._unit_of_measurement = TEMP_CELSIUS
         self._data = {}
         self._hvac_modes = [HVAC_MODE_HEAT]
 
+        self._remove_callbacks: List[Callable[[], None]] = []
+
+    async def async_added_to_hass(self) -> None:
+        """Register callbacks when entity is added."""
+        kwargs = {
+            "key": self._key,
+        }
+        self._remove_callbacks.append(
+            async_dispatcher_connect(
+                self.hass, DISPATCHER_ON_DEVICE_UPDATE.format(**kwargs), self.async_schedule_update_ha_state
+            )
+        )
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Unregister callbacks."""
+        for remove_callback in self._remove_callbacks:
+            remove_callback()
+        self._remove_callbacks = []
 
     @property
     def supported_features(self):
@@ -59,27 +80,19 @@ class NefitThermostat(ClimateDevice):
     def target_temperature_step(self):
         return 0.5
 
-            
     async def async_update(self):
-        """Get latest data
-        """
-        _LOGGER.debug("climate: async_update called")
-        tasks = []
-        for url in self.watch_events:
-            event = self._client.events[url]
-            event.clear()
-            self._client.nefit.get(url)
-            tasks.append(asyncio.wait_for(event.wait(), timeout=10))
-        
-        await asyncio.gather(*tasks)
-    
-        _LOGGER.debug("climate: async_update finished")
+        """Get latest data."""
+        _LOGGER.debug("async_update called for climate device")
+        event = self._client.events[self._key]
+        event.clear() #clear old event
+        self._client.nefit.get(self._url)
+        await asyncio.wait_for(event.wait(), timeout=10)
 
     @property
     def name(self):
         """Return the name of the ClimateDevice.
         """
-        return self.config.get(CONF_NAME)
+        return self._config.get(CONF_NAME)
 
     @property
     def temperature_unit(self):
@@ -143,12 +156,12 @@ class NefitThermostat(ClimateDevice):
     @property
     def min_temp(self):
         """Return the minimum temperature."""
-        return self.config.get(CONF_MIN_TEMP)
+        return self._config.get(CONF_MIN_TEMP)
 
     @property
     def max_temp(self):
         """Return the maximum temperature."""
-        return self.config.get(CONF_MAX_TEMP)
+        return self._config.get(CONF_MAX_TEMP)
 
     async def async_set_preset_mode(self, preset_mode):
         """Set new target operation mode."""
