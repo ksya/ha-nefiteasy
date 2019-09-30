@@ -24,7 +24,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     async_add_entities([
         NefitHotWater(client, {name: "Nefit Hot Water", key: 'hot_water'}),
-        NefitSwitch(client, {name: "Nefit Holiday Mode", key: 'holiday_mode', url: '/heatingCircuits/hc1/holidayMode/status'}),
+        NefitSwitch(client, {name: "Nefit Holiday Mode", key: 'holiday_mode', url: '/heatingCircuits/hc1/holidayMode/activated'}),
         NefitSwitch(client, {name: "Nefit Fireplace Mode", key: 'fireplace_mode', url: '/ecus/rrc/userprogram/fireplacefunction'}),
         NefitSwitch(client, {name: "Nefit Today as Sunday", key: 'today_as_sunday', url: '/ecus/rrc/dayassunday/day10/active'}),
         NefitSwitch(client, {name: "Nefit Tomorrow as Sunday", key: 'tomorrow_as_sunday', url: '/ecus/rrc/dayassunday/day11/active'}),
