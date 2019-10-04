@@ -1,5 +1,7 @@
 """Constants for the nefiteasy component."""
 
+from homeassistant.const import (TEMP_CELSIUS, PRESSURE_BAR)
+
 DOMAIN = 'nefiteasy'
 
 CONF_SERIAL = 'serial'
@@ -21,7 +23,8 @@ name = 'name'
 url = 'url'
 unit = 'unit'
 device_class = 'device_class'
-short: 'short'
+short = 'short'
+icon = 'icon'
 
 SENSOR_TYPES = {
     'year_total': {

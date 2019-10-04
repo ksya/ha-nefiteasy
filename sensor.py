@@ -6,10 +6,9 @@ https://home-assistant.io/components/xxxxxx/
 
 import logging
 
-from homeassistant.const import (TEMP_CELSIUS, PRESSURE_BAR)
 #from homeassistant.core import callback
 
-from .const import DOMAIN, CONF_SENSORS
+from .const import DOMAIN, CONF_SENSORS, SENSOR_TYPES
 from .nefit_device import NefitDevice
 
 _LOGGER = logging.getLogger(__name__)

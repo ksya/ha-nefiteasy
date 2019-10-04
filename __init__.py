@@ -67,9 +67,10 @@ class NefitEasy:
         from aionefit import NefitCore
         _LOGGER.debug("Initialize Nefit class")
 
-        self.data = {}
+        self.data = {} #stores device states and values
         self.keys = {} #unique name for entity
         self.events = {}
+        self.uiStatusVars = {} #variables to monitor for sensors
         self.hass = hass
         self.connected_state = STATE_INIT
         
@@ -136,12 +137,19 @@ class NefitEasy:
                 self.data['boiler_indicator'] = data['value']['BAI']  #for climate
                 self.data['last_update'] = data['value']['CTD']
 
-            self.data[key] = data['value']
+                for uikey in self.uiStatusVars:
+                    self.updateDeviceValue(uikey, data['value'].get(self.uiStatusVars[uikey]))
 
-            #send update signal to dispatcher to pick up new state
-            signal = DISPATCHER_ON_DEVICE_UPDATE.format(key=key)
-            async_dispatcher_send(self.hass, signal)
+            self.updateDeviceValue(key, data['value'])
 
-            # Mark event as finished
+            # Mark event as finished if it was part of an update action
             if key in self.events:
                 self.events[key].set()
+
+    def updateDeviceValue(self, key, value):
+        """Store new device value and send to dispatcher to be picked up by device"""
+        self.data[key] = value
+
+        #send update signal to dispatcher to pick up new state
+        signal = DISPATCHER_ON_DEVICE_UPDATE.format(key=key)
+        async_dispatcher_send(self.hass, signal)

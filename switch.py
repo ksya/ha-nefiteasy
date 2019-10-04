@@ -10,7 +10,7 @@ import logging
 from homeassistant.components.switch import SwitchDevice
 from homeassistant.const import STATE_OFF, STATE_ON
 
-from .const import DOMAIN, CONF_SWITCHES
+from .const import DOMAIN, CONF_SWITCHES, SWITCH_TYPES
 from .nefit_device import NefitDevice
 
 _LOGGER = logging.getLogger(__name__)

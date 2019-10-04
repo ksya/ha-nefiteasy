@@ -18,8 +18,10 @@ class NefitDevice(Entity):
         self._device = device
         self._key = key
         self._url = device['url']
-        client.events[self._key] = asyncio.Event()
-        client.keys[self._url] = self._key
+        client.events[key] = asyncio.Event()
+        client.keys[self._url] = key
+        if 'short' in device:
+            client.uiStatusVars[key] = device['short']
 
         self._remove_callbacks: List[Callable[[], None]] = []
 
@@ -63,5 +65,8 @@ class NefitDevice(Entity):
 
     @property
     def should_poll(self) -> bool:
-        """Enable polling for regular state updates"""
-        return True
+        """Enable polling if value does not exist in uiStatus"""
+        if 'short' in self._device:
+            return False
+        else:
+            return True
