@@ -30,7 +30,8 @@ SENSOR_TYPES = {
     'year_total': {
         name: "Nefit Year total",
         url: '/ecus/rrc/recordings/yearTotal',
-        unit: 'm3'
+        unit: 'm3',
+        icon: 'mdi:gas-cylinder'
     },
     'status': {
         name: "Nefit status",
@@ -56,7 +57,8 @@ SENSOR_TYPES = {
     },
     'active_program': {
         name: "Nefit Active program",
-        url: '/ecus/rrc/userprogram/activeprogram'
+        url: '/ecus/rrc/userprogram/activeprogram',
+        icon: 'mdi:calendar-today'
     },
     'hot_water_operation': {
         name: "Nefit Hot water operation",
@@ -68,30 +70,36 @@ SENSOR_TYPES = {
 SWITCH_TYPES = {
     'hot_water': {
         name: "Nefit Hot water",
-        short: 'DHW'
+        short: 'DHW',
+        icon: 'mdi:water-boiler'
     },
     'holiday_mode': {
         name: "Nefit Holiday mode",
         url: '/heatingCircuits/hc1/holidayMode/status',
-        short: 'HMD'
+        short: 'HMD',
+        icon: 'mdi:briefcase-outline'
     },
     'fireplace_mode': {
         name: "Nefit Fireplace mode",
         url: '/ecus/rrc/userprogram/fireplacefunction',
-        short: 'FPA'
+        short: 'FPA',
+        icon: 'mdi:fire'
     },
     'today_as_sunday': {
         name: "Nefit Today as Sunday",
         url: '/ecus/rrc/dayassunday/day10/active',
-        short: 'DAS'
+        short: 'DAS',
+        icon: 'mdi:calendar-star'
     },
     'tomorrow_as_sunday': {
         name: "Nefit Tomorrow as Sunday",
         url: '/ecus/rrc/dayassunday/day11/active',
-        short: 'TAS'
+        short: 'TAS',
+        icon: 'mdi:calendar-star'
     },
     'preheating': {
         name: "Nefit Preheating",
-        url: '/ecus/rrc/userprogram/preheating'
+        url: '/ecus/rrc/userprogram/preheating',
+        icon: 'mdi:calendar-clock'
     },
 }

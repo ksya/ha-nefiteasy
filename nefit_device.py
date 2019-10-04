@@ -44,14 +44,14 @@ class NefitDevice(Entity):
 
     async def async_update(self):
         """Request latest data."""
-        _LOGGER.debug("async_update called for %s", self.unique_id)
+        _LOGGER.debug("async_update called for %s", self._key)
         event = self._client.events[self._key]
         event.clear() #clear old event
         self._client.nefit.get(self.get_endpoint())
         try:
             await asyncio.wait_for(event.wait(), timeout=10)
         except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("Did not get an update in time for %s.", self.unique_id)
+            _LOGGER.debug("Did not get an update in time for %s.", self._key)
             event.clear() #clear event
         
     @property
@@ -70,3 +70,9 @@ class NefitDevice(Entity):
             return False
         else:
             return True
+
+    @property
+    def icon(self):
+        """Return possible sensor specific icon."""
+        if 'icon' in self._device:
+            return self._device['icon']
