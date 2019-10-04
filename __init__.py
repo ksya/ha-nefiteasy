@@ -13,45 +13,35 @@ import voluptuous as vol
 
 #from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-from homeassistant.exceptions import PlatformNotReady, InvalidStateError
+from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.discovery import async_load_platform
-from homeassistant.helpers.dispatcher import async_dispatcher_send, async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 
+from .const import (DOMAIN, 
+    CONF_SERIAL, CONF_ACCESSKEY, CONF_PASSWORD, CONF_NAME, 
+    CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_SWITCHES, CONF_SENSORS, 
+    DISPATCHER_ON_DEVICE_UPDATE, 
+    STATE_CONNECTED, STATE_INIT, STATE_ERROR_AUTH, 
+    SENSOR_TYPES, SWITCH_TYPES)
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "nefiteasy"
+CONFIG_SCHEMA = vol.Schema({
+    DOMAIN: vol.Schema({
+        vol.Required(CONF_SERIAL): cv.string,
+        vol.Required(CONF_ACCESSKEY): cv.string,
+        vol.Required(CONF_PASSWORD): cv.string,
+        vol.Optional(CONF_NAME, default="Nefit Easy"): cv.string,
+        vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
+        vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
+        vol.Optional(CONF_SENSORS, default=list(SENSOR_TYPES)):
+            vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
+        vol.Optional(CONF_SWITCHES, default=list(SWITCH_TYPES)):
+            vol.All(cv.ensure_list, [vol.In(SWITCH_TYPES)]),
+    })
+}, extra=vol.ALLOW_EXTRA)
 
-CONF_SERIAL = "serial"
-CONF_ACCESSKEY = "accesskey"
-CONF_PASSWORD = "password"
-CONF_NAME = "name"
-CONF_MIN_TEMP = "min_temp"
-CONF_MAX_TEMP = "max_temp"
-
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_SERIAL): cv.string,
-                vol.Required(CONF_ACCESSKEY): cv.string,
-                vol.Required(CONF_PASSWORD): cv.string,
-                vol.Optional(CONF_NAME, default="Nefit Easy"): cv.string,
-                vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
-                vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
-
-DISPATCHER_ON_DEVICE_UPDATE = "nefiteasy_{key}_on_device_update"
-
-STATE_CONNECTED = 'connected'
-STATE_INIT = 'initializing'
-STATE_ERROR_AUTH = 'authentication_failed'
 
 
 async def async_setup(hass, config):
@@ -64,7 +54,7 @@ async def async_setup(hass, config):
     client = nefit_data["client"] = NefitEasy(hass, credentials)
     await client.connect()
 
-    for platform in ["climate", "sensor", "switch"]: #["climate", "sensor", "switch"]:
+    for platform in ["climate", "sensor", "switch"]:
         hass.async_create_task(
             async_load_platform(hass, platform, DOMAIN, {}, config)
         )
@@ -155,61 +145,3 @@ class NefitEasy:
             # Mark event as finished
             if key in self.events:
                 self.events[key].set()
-
-
-class NefitDevice(Entity):
-    """Representation of a Nefit device."""
-
-    def __init__(self, client, device):
-        """Initialize the sensor."""
-        self._client = client
-        self._device = device
-        self._key = device['key']
-        self._url = device['url']
-        client.events[self._key] = asyncio.Event()
-        client.keys[self._url] = self._key
-
-        self._remove_callbacks: List[Callable[[], None]] = []
-
-    async def async_added_to_hass(self) -> None:
-        """Register callbacks when entity is added."""
-        kwargs = {
-            "key": self._key,
-        }
-        self._remove_callbacks.append(
-            async_dispatcher_connect(
-                self.hass, DISPATCHER_ON_DEVICE_UPDATE.format(**kwargs), self.async_schedule_update_ha_state
-            )
-        )
-
-    async def async_will_remove_from_hass(self) -> None:
-        """Unregister callbacks."""
-        for remove_callback in self._remove_callbacks:
-            remove_callback()
-        self._remove_callbacks = []
-
-    async def async_update(self):
-        """Request latest data."""
-        _LOGGER.debug("async_update called for %s", self._key)
-        event = self._client.events[self._key]
-        event.clear() #clear old event
-        self._client.nefit.get(self.get_endpoint())
-        try:
-            await asyncio.wait_for(event.wait(), timeout=10)
-        except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("Did not get an update in time for %s.", self._key)
-            event.clear() #clear event
-        
-    @property
-    def name(self):
-        """Return the name of the device. """
-        return self._device['name']
-
-    def get_endpoint(self):
-        """Return the API endpoint."""
-        return self._device['url']
-
-    @property
-    def should_poll(self) -> bool:
-        """Enable polling for regular state updates"""
-        return True

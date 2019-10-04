@@ -6,7 +6,6 @@ https://home-assistant.io/components/xxxxxx/
 
 import asyncio
 import logging
-import voluptuous as vol
 
 from homeassistant.components.climate import ClimateDevice
 from homeassistant.components.climate.const import (SUPPORT_TARGET_TEMPERATURE, SUPPORT_PRESET_MODE,
@@ -17,7 +16,7 @@ from homeassistant.const import STATE_UNKNOWN, EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from . import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, DISPATCHER_ON_DEVICE_UPDATE
+from .const import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, DISPATCHER_ON_DEVICE_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,7 +85,7 @@ class NefitThermostat(ClimateDevice):
         event = self._client.events[self._key]
         event.clear() #clear old event
         self._client.nefit.get(self._url)
-        await asyncio.wait_for(event.wait(), timeout=10)
+        await asyncio.wait_for(event.wait(), timeout=9)
 
     @property
     def name(self):
@@ -172,7 +171,7 @@ class NefitThermostat(ClimateDevice):
             new_mode = "manual"
 
         self._client.nefit.set_usermode(new_mode)
-        await asyncio.wait_for(self._client.nefit.xmppclient.message_event.wait(), timeout=10.0)
+        await asyncio.wait_for(self._client.nefit.xmppclient.message_event.wait(), timeout=9)
         self._client.nefit.xmppclient.message_event.clear()
         self._client.data['user_mode'] = new_mode
 
@@ -181,5 +180,5 @@ class NefitThermostat(ClimateDevice):
         temperature = kwargs.get(ATTR_TEMPERATURE)
         _LOGGER.debug("set_temperature called (temperature={}).".format(temperature))
         self._client.nefit.set_temperature(temperature)
-        await asyncio.wait_for(self._client.nefit.xmppclient.message_event.wait(), timeout=10.0)
+        await asyncio.wait_for(self._client.nefit.xmppclient.message_event.wait(), timeout=9)
         self._client.nefit.xmppclient.message_event.clear()        

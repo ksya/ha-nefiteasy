@@ -4,35 +4,32 @@ For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/xxxxxx/
 """
 
-import asyncio
 import logging
-import voluptuous as vol
 
-from homeassistant.const import (TEMP_CELSIUS, PRESSURE_BAR, ATTR_TEMPERATURE, ENERGY_KILO_WATT_HOUR, 
-    DEVICE_CLASS_TEMPERATURE)
+from homeassistant.const import (TEMP_CELSIUS, PRESSURE_BAR)
 #from homeassistant.core import callback
 
-from . import DOMAIN, NefitDevice
+from .const import DOMAIN, CONF_SENSORS
+from .nefit_device import NefitDevice
 
 _LOGGER = logging.getLogger(__name__)
 
-name = 'name'
-key = 'key'
-url = 'url'
-unit = 'unit'
-device_class = 'device_class'
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     client = hass.data[DOMAIN]["client"]
 
-    async_add_entities([
-        NefitYearTotal(client, {name: "Nefit Year Total", key: 'year_total',  url: '/ecus/rrc/recordings/yearTotal', unit: 'm3'}),
-        NefitStatus(client, {name: "Nefit Status", key: 'status',  url: '/system/appliance/displaycode'}),
-        NefitSensor(client, {name: "Nefit Supply Temperature", key: 'supply_temperature', url: '/heatingCircuits/hc1/actualSupplyTemperature', unit: TEMP_CELSIUS, device_class: 'temperature'}),
-        NefitSensor(client, {name: "Nefit CV Pressure", key: 'system_pressure',  url: '/system/appliance/systemPressure', unit: PRESSURE_BAR, device_class: 'pressure'}),
-        NefitSensor(client, {name: "Nefit Outdoor Temperature", key: 'outdoor_temperature',  url: '/system/sensors/temperatures/outdoor_t1', unit: TEMP_CELSIUS, device_class: 'temperature'}),
-        NefitSensor(client, {name: "Nefit Active Program", key: 'active_program',  url: '/ecus/rrc/userprogram/activeprogram'}),
-        ], True)
+    devices = []
+    for key in hass.data[DOMAIN]["config"][CONF_SENSORS]:
+        dev = SENSOR_TYPES[key]
+        if key == 'status':
+            devices.append(NefitStatus(client, key, dev))
+        elif key == 'year_total':
+            devices.append(NefitYearTotal(client, key, dev))
+        else:
+            devices.append(NefitSensor(client, key, dev))
+
+    async_add_entities(devices, True)
+
     _LOGGER.debug("sensor: async_setup_platform done")
 
 

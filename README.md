@@ -17,12 +17,35 @@ nefiteasy:
   serial: 'XXXXXXXXX'
   accesskey: 'xxxxxxxxx'
   password: 'xxxxxxxxx'
-  name: Nefit Easy #optional
-  min_temp: 15 #optional
-  max_temp: 27 #optional
+  name: Nefit Easy #below here all optional settings
+  min_temp: 15
+  max_temp: 27
+  sensors:
+   - #list of sensors to be exposed
+  switches:
+   - list of switches to be exposed
 ```
 
 If any of your secrets in the configuration is numbers only, make sure to put it between quotes (`'`) to have homeassistant parse them correctly.
+
+### Example
+```
+nefiteasy:
+  serial: '01234567'
+  accesskey: !secret nefitaccesskey
+  password: !secret nefitpassword
+  sensors:
+    - status
+    - supply_temperature
+    - hot_water_operation
+  switches:
+    - hot_water
+    - holiday_mode
+    - preheating
+```
+
+## Available sensors & switches
+See const.py file.
 
 ## Debugging problems
 

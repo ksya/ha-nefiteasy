@@ -6,30 +6,29 @@ https://home-assistant.io/components/xxxxxx/
 
 import asyncio
 import logging
-import voluptuous as vol
 
 from homeassistant.components.switch import SwitchDevice
 from homeassistant.const import STATE_OFF, STATE_ON
 
-from . import DOMAIN, NefitDevice
+from .const import DOMAIN, CONF_SWITCHES
+from .nefit_device import NefitDevice
 
 _LOGGER = logging.getLogger(__name__)
 
-name = 'name'
-key = 'key'
-url = 'url'
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     client = hass.data[DOMAIN]["client"]
 
-    async_add_entities([
-        NefitHotWater(client, {name: "Nefit Hot Water", key: 'hot_water'}),
-        NefitSwitch(client, {name: "Nefit Holiday Mode", key: 'holiday_mode', url: '/heatingCircuits/hc1/holidayMode/activated'}),
-        NefitSwitch(client, {name: "Nefit Fireplace Mode", key: 'fireplace_mode', url: '/ecus/rrc/userprogram/fireplacefunction'}),
-        NefitSwitch(client, {name: "Nefit Today as Sunday", key: 'today_as_sunday', url: '/ecus/rrc/dayassunday/day10/active'}),
-        NefitSwitch(client, {name: "Nefit Tomorrow as Sunday", key: 'tomorrow_as_sunday', url: '/ecus/rrc/dayassunday/day11/active'}),
-        NefitSwitch(client, {name: "Nefit Preheating", key: 'preheating', url: '/ecus/rrc/userprogram/preheating'}),
-        ], True)
+    devices = []
+    for key in hass.data[DOMAIN]["config"][CONF_SWITCHES]:
+        dev = SWITCH_TYPES[key]
+        if key == 'hot_water':
+            devices.append(NefitHotWater(client, key, dev))
+        else:
+            devices.append(NefitSwitch(client, key, dev))
+
+    async_add_entities(devices, True)
+
     _LOGGER.debug("switch: async_setup_platform done")
 
 
@@ -61,11 +60,11 @@ class NefitSwitch(NefitDevice, SwitchDevice):
 
 class NefitHotWater(NefitSwitch):
 
-    def __init__(self, client, device):
+    def __init__(self, client, key, device):
         """Initialize the switch."""
         self._client = client
         self._device = device
-        self._key = device['key']
+        self._key = key
         client.events[self._key] = asyncio.Event()
         client.keys['/dhwCircuits/dhwA/dhwOperationClockMode'] = self._key
         client.keys['/dhwCircuits/dhwA/dhwOperationManualMode'] = self._key
