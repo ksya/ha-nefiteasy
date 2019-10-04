@@ -72,7 +72,7 @@ SWITCH_TYPES = {
     },
     'holiday_mode': {
         name: "Nefit Holiday mode",
-        url: '/heatingCircuits/hc1/holidayMode/activated',
+        url: '/heatingCircuits/hc1/holidayMode/status',
         short: 'HMD'
     },
     'fireplace_mode': {

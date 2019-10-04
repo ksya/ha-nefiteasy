@@ -121,7 +121,7 @@ class NefitEasy:
     def parse_message(self, data):
         """Message received callback function for the XMPP client.
         """
-        _LOGGER.debug("parse_message callback called with data %s", data)
+        _LOGGER.debug("parse_message data %s", data)
         if not 'id' in data:
             _LOGGER.error("Unknown response received: %s", data)
             return
