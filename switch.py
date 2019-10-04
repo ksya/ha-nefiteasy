@@ -62,14 +62,10 @@ class NefitHotWater(NefitSwitch):
 
     def __init__(self, client, key, device):
         """Initialize the switch."""
-        self._client = client
-        self._device = device
-        self._key = key
-        client.events[self._key] = asyncio.Event()
+        super().__init__(client, key, device)
+
         client.keys['/dhwCircuits/dhwA/dhwOperationClockMode'] = self._key
         client.keys['/dhwCircuits/dhwA/dhwOperationManualMode'] = self._key
-
-        self._remove_callbacks: List[Callable[[], None]] = []
         
     def get_endpoint(self):
         endpoint = 'dhwOperationClockMode' if self._client.data.get('user_mode') == 'clock' else 'dhwOperationManualMode'

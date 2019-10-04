@@ -43,6 +43,8 @@ class NefitThermostat(ClimateDevice):
         self._config = config
         self._key = 'uistatus'
         self._url = '/ecus/rrc/uiStatus'
+        self._unique_id = "%s_%s" % (self._client.nefit.serial_number, self._key)
+
         client.events[self._key] = asyncio.Event()
         client.keys[self._url] = self._key
 
@@ -93,6 +95,11 @@ class NefitThermostat(ClimateDevice):
         """
         return self._config.get(CONF_NAME)
 
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        return self._unique_id
+        
     @property
     def temperature_unit(self):
         """Return the unit of measurement.
@@ -149,7 +156,8 @@ class NefitThermostat(ClimateDevice):
     def device_state_attributes(self):
         """Return the device specific state attributes."""
         return {
-            'last_update': self._client.data.get('last_update')
+            'last_update': self._client.data.get('last_update'),
+            'boiler_indicator': self._client.data.get('boiler_indicator')
         }
 
     @property

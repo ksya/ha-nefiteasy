@@ -17,9 +17,14 @@ class NefitDevice(Entity):
         self._client = client
         self._device = device
         self._key = key
-        self._url = device['url']
+        self._unique_id = "%s_%s" % (self._client.nefit.serial_number, self._key)
+
         client.events[key] = asyncio.Event()
-        client.keys[self._url] = key
+        
+        if 'url' in device:
+            self._url = device['url']
+            client.keys[self._url] = key
+
         if 'short' in device:
             client.uiStatusVars[key] = device['short']
 
@@ -41,6 +46,9 @@ class NefitDevice(Entity):
         for remove_callback in self._remove_callbacks:
             remove_callback()
         self._remove_callbacks = []
+        
+        del self._client.events[self._key] 
+        del self._client.uiStatusVars[key]
 
     async def async_update(self):
         """Request latest data."""
@@ -59,9 +67,10 @@ class NefitDevice(Entity):
         """Return the name of the device. """
         return self._device['name']
 
-    def get_endpoint(self):
-        """Return the API endpoint."""
-        return self._device['url']
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        return self._unique_id
 
     @property
     def should_poll(self) -> bool:
@@ -76,3 +85,7 @@ class NefitDevice(Entity):
         """Return possible sensor specific icon."""
         if 'icon' in self._device:
             return self._device['icon']
+        
+    def get_endpoint(self):
+        """Return the API endpoint."""
+        return self._url
