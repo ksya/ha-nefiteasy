@@ -4,8 +4,6 @@ For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/xxxxxx/
 """
 
-REQUIREMENTS = ['aionefit==0.4']
-
 import logging
 import concurrent
 import asyncio
@@ -73,7 +71,8 @@ class NefitEasy:
         self.uiStatusVars = {} #variables to monitor for sensors
         self.hass = hass
         self.connected_state = STATE_INIT
-        
+        self.expected_end = False
+
         self.nefit = NefitCore(serial_number=credentials.get(CONF_SERIAL),
                        access_key=credentials.get(CONF_ACCESSKEY),
                        password=credentials.get(CONF_PASSWORD),
@@ -81,6 +80,7 @@ class NefitEasy:
         
         self.nefit.failed_auth_handler = self.failed_auth_handler
         self.nefit.no_content_callback = self.no_content_callback
+        self.nefit.session_end_callback = self.session_end_callback
 
     async def connect(self):
         self.nefit.connect()
@@ -109,6 +109,7 @@ class NefitEasy:
 
     def shutdown(self, event):
         _LOGGER.debug("Shutdown connection to Bosch cloud")
+        self.expected_end = True
         self.nefit.disconnect()
 
     def no_content_callback(self, data):
@@ -117,6 +118,15 @@ class NefitEasy:
     def failed_auth_handler(self, event):
         self.connected_state = STATE_ERROR_AUTH
         self.nefit.xmppclient.connected_event.set()
+
+    def session_end_callback(self):
+        """If connection is closed unexpectedly, try to reconnect"""
+        if not self.expected_end:
+            self.hass.components.persistent_notification.create( 
+                'Unexpected disconnect with Bosch server',
+                title='Nefit error',
+                notification_id='nefit_disconnect')
+            connect()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client.
