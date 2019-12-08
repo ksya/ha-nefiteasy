@@ -24,12 +24,29 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         dev = SWITCH_TYPES[key]
         if key == 'hot_water':
             devices.append(NefitHotWater(client, key, dev))
+        elif key == 'home_entrance_detection':
+            await setup_home_entrance_detection(devices, client, key, dev)
         else:
             devices.append(NefitSwitch(client, key, dev))
 
     async_add_entities(devices, True)
 
     _LOGGER.debug("switch: async_setup_platform done")
+
+
+async def setup_home_entrance_detection(devices, client, basekey, basedev):
+    for i in range(0, 10):
+        userprofile_id = 'userprofile{}'.format(i)
+        endpoint = '/ecus/rrc/homeentrancedetection/{}/'.format(userprofile_id)
+        is_active = await client.get_value(userprofile_id, endpoint + 'active')
+        _LOGGER.debug("hed switch: is_active: " + str(is_active))
+        if is_active == 'on':
+            name = await client.get_value(userprofile_id, endpoint + 'name')
+            dev = {}
+            dev['name'] = basedev['name'].format(name)
+            dev['url'] = endpoint + 'detected'
+            dev['icon'] = basedev['icon']
+            devices.append(NefitSwitch(client, '{}_{}'.format(basekey, userprofile_id), dev))
 
 
 class NefitSwitch(NefitDevice, SwitchDevice):
