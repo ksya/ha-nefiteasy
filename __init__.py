@@ -126,7 +126,7 @@ class NefitEasy:
                 'Unexpected disconnect with Bosch server',
                 title='Nefit error',
                 notification_id='nefit_disconnect')
-            connect()
+            self.nefit.connect()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client.
