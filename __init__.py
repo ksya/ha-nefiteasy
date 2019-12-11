@@ -126,7 +126,7 @@ class NefitEasy:
                 'Unexpected disconnect with Bosch server',
                 title='Nefit error',
                 notification_id='nefit_disconnect')
-            connect()
+            self.nefit.connect()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client.
@@ -163,3 +163,17 @@ class NefitEasy:
         #send update signal to dispatcher to pick up new state
         signal = DISPATCHER_ON_DEVICE_UPDATE.format(key=key)
         async_dispatcher_send(self.hass, signal)
+
+    async def get_value(self, key, url):
+        isNewKey = not url in self.keys
+        if isNewKey:
+            self.events[key] = asyncio.Event()
+            self.keys[url] = key
+        event = self.events[key]
+        event.clear() #clear old event
+        self.nefit.get(url)
+        await asyncio.wait_for(event.wait(), timeout=9)
+        if isNewKey:
+            del self.events[key]
+            del self.keys[url]
+        return self.data[key]
