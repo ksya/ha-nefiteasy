@@ -102,8 +102,4 @@ SWITCH_TYPES = {
         url: '/ecus/rrc/userprogram/preheating',
         icon: 'mdi:calendar-clock'
     },
-    'home_entrance_detection': {
-        name: "Nefit Presence {}",
-        icon: 'mdi:account-check'
-    },
 }

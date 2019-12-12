@@ -9,7 +9,7 @@ import concurrent
 import asyncio
 import voluptuous as vol
 
-#from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import config_validation as cv
@@ -44,6 +44,9 @@ CONFIG_SCHEMA = vol.Schema({
 
 async def async_setup(hass, config):
 
+    _LOGGER.debug(bool(hass.config_entries.async_entries(DOMAIN)))
+
+    
     nefit_data = hass.data[DOMAIN] = {}
     hass.data[DOMAIN]["config"] = config[DOMAIN]
 
@@ -56,6 +59,27 @@ async def async_setup(hass, config):
         hass.async_create_task(
             async_load_platform(hass, platform, DOMAIN, {}, config)
         )
+
+    return True
+
+
+async def async_setup_entry(hass, entry):
+    """Set up from a config entry."""
+
+    # session = async_get_clientsession(hass)
+    # twentemilieu = TwenteMilieu(
+    #     post_code=entry.data[CONF_POST_CODE],
+    #     house_number=entry.data[CONF_HOUSE_NUMBER],
+    #     house_letter=entry.data[CONF_HOUSE_LETTER],
+    #     session=session,
+    # )
+
+    unique_id = entry.data[CONF_ID]
+    hass.data.setdefault(DOMAIN, {})[unique_id] = twentemilieu
+
+    # hass.async_create_task(
+    #     hass.config_entries.async_forward_entry_setup(entry, "sensor")
+    # )
 
     return True
 
@@ -126,7 +150,7 @@ class NefitEasy:
                 'Unexpected disconnect with Bosch server',
                 title='Nefit error',
                 notification_id='nefit_disconnect')
-            self.nefit.connect()
+            connect()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client.
@@ -163,17 +187,3 @@ class NefitEasy:
         #send update signal to dispatcher to pick up new state
         signal = DISPATCHER_ON_DEVICE_UPDATE.format(key=key)
         async_dispatcher_send(self.hass, signal)
-
-    async def get_value(self, key, url):
-        isNewKey = not url in self.keys
-        if isNewKey:
-            self.events[key] = asyncio.Event()
-            self.keys[url] = key
-        event = self.events[key]
-        event.clear() #clear old event
-        self.nefit.get(url)
-        await asyncio.wait_for(event.wait(), timeout=9)
-        if isNewKey:
-            del self.events[key]
-            del self.keys[url]
-        return self.data[key]
