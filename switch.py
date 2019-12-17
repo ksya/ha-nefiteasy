@@ -17,24 +17,27 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    client = hass.data[DOMAIN]["client"]
+    
+    for device in hass.data[DOMAIN]["devices"]:
+        client = device['client']
+        config = device['config']
 
-    devices = []
-    for key in hass.data[DOMAIN]["config"][CONF_SWITCHES]:
-        dev = SWITCH_TYPES[key]
-        if key == 'hot_water':
-            devices.append(NefitHotWater(client, key, dev))
-        elif key == 'home_entrance_detection':
-            await setup_home_entrance_detection(devices, client, key, dev)
-        else:
-            devices.append(NefitSwitch(client, key, dev))
+        entities = []
+        for key in config[CONF_SWITCHES]:
+            dev = SWITCH_TYPES[key]
+            if key == 'hot_water':
+                entities.append(NefitHotWater(client, key, dev))
+            elif key == 'home_entrance_detection':
+                await setup_home_entrance_detection(entities, client, key, dev)
+            else:
+                entities.append(NefitSwitch(client, key, dev))
 
-    async_add_entities(devices, True)
+        async_add_entities(entities, True)
 
     _LOGGER.debug("switch: async_setup_platform done")
 
 
-async def setup_home_entrance_detection(devices, client, basekey, basedev):
+async def setup_home_entrance_detection(entities, client, basekey, basedev):
     for i in range(0, 10):
         userprofile_id = 'userprofile{}'.format(i)
         endpoint = '/ecus/rrc/homeentrancedetection/{}/'.format(userprofile_id)
@@ -46,7 +49,7 @@ async def setup_home_entrance_detection(devices, client, basekey, basedev):
             dev['name'] = basedev['name'].format(name)
             dev['url'] = endpoint + 'detected'
             dev['icon'] = basedev['icon']
-            devices.append(NefitSwitch(client, '{}_{}'.format(basekey, userprofile_id), dev))
+            entities.append(NefitSwitch(client, '{}_{}'.format(basekey, userprofile_id), dev))
 
 
 class NefitSwitch(NefitDevice, SwitchDevice):

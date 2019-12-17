@@ -16,8 +16,8 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
-from .const import (DOMAIN, 
-    CONF_SERIAL, CONF_ACCESSKEY, CONF_PASSWORD, CONF_NAME, 
+from .const import (DOMAIN, CONF_DEVICES,
+    CONF_SERIAL, CONF_ACCESSKEY, CONF_PASSWORD, CONF_NAME,
     CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_SWITCHES, CONF_SENSORS, 
     DISPATCHER_ON_DEVICE_UPDATE, 
     STATE_CONNECTED, STATE_INIT, STATE_ERROR_AUTH, 
@@ -25,18 +25,23 @@ from .const import (DOMAIN,
 
 _LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN: vol.Schema({
+CONNECTION_SCHEMA = vol.Schema(
+    {
         vol.Required(CONF_SERIAL): cv.string,
         vol.Required(CONF_ACCESSKEY): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_NAME, default="Nefit Easy"): cv.string,
+        vol.Optional(CONF_SENSORS, default=list(SENSOR_TYPES)):
+        vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
+        vol.Optional(CONF_SWITCHES, default=list(SWITCH_TYPES)):
+        vol.All(cv.ensure_list, [vol.In(SWITCH_TYPES)]),
+    })
+
+CONFIG_SCHEMA = vol.Schema({
+    DOMAIN: vol.Schema({
+        vol.Required(CONF_DEVICES): vol.All(cv.ensure_list, [CONNECTION_SCHEMA]), # array of serial, accesskey, password
         vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
         vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
-        vol.Optional(CONF_SENSORS, default=list(SENSOR_TYPES)):
-            vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
-        vol.Optional(CONF_SWITCHES, default=list(SWITCH_TYPES)):
-            vol.All(cv.ensure_list, [vol.In(SWITCH_TYPES)]),
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -45,17 +50,26 @@ CONFIG_SCHEMA = vol.Schema({
 async def async_setup(hass, config):
 
     nefit_data = hass.data[DOMAIN] = {}
-    hass.data[DOMAIN]["config"] = config[DOMAIN]
+    nefit_data['devices'] = []
 
-    credentials = dict(config[DOMAIN])
+    conf = config.get(DOMAIN)
 
-    client = nefit_data["client"] = NefitEasy(hass, credentials)
-    await client.connect()
+    if CONF_DEVICES not in conf:
+        return True
 
-    for platform in ["climate", "sensor", "switch"]:
-        hass.async_create_task(
-            async_load_platform(hass, platform, DOMAIN, {}, config)
-        )
+    for device_conf in conf[CONF_DEVICES]:
+        credentials = dict(device_conf)
+        nefit_data['devices'].append({})
+        device = nefit_data['devices'][-1]
+        device['client'] = client = NefitEasy(hass, credentials)
+        device['config'] = device_conf
+
+        await client.connect()
+
+        for platform in ["climate", "sensor", "switch"]:
+            hass.async_create_task(
+                async_load_platform(hass, platform, DOMAIN, {}, device_conf)
+            )
 
     return True
 
@@ -126,7 +140,7 @@ class NefitEasy:
                 'Unexpected disconnect with Bosch server',
                 title='Nefit error',
                 notification_id='nefit_disconnect')
-            self.nefit.connect()
+            self.connect()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client.

@@ -15,19 +15,22 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    client = hass.data[DOMAIN]["client"]
 
-    devices = []
-    for key in hass.data[DOMAIN]["config"][CONF_SENSORS]:
-        dev = SENSOR_TYPES[key]
-        if key == 'status':
-            devices.append(NefitStatus(client, key, dev))
-        elif key == 'year_total':
-            devices.append(NefitYearTotal(client, key, dev))
-        else:
-            devices.append(NefitSensor(client, key, dev))
+    for device in hass.data[DOMAIN]["devices"]:
+        client = device['client']
+        config = device['config']
 
-    async_add_entities(devices, True)
+        entities = []
+        for key in config[CONF_SENSORS]:
+            dev = SENSOR_TYPES[key]
+            if key == 'status':
+                entities.append(NefitStatus(client, key, dev))
+            elif key == 'year_total':
+                entities.append(NefitYearTotal(client, key, dev))
+            else:
+                entities.append(NefitSensor(client, key, dev))
+
+        async_add_entities(entities, True)
 
     _LOGGER.debug("sensor: async_setup_platform done")
 

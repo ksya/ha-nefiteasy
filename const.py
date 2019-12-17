@@ -4,6 +4,7 @@ from homeassistant.const import (TEMP_CELSIUS, PRESSURE_BAR)
 
 DOMAIN = 'nefiteasy'
 
+CONF_DEVICES = 'devices'
 CONF_SERIAL = 'serial'
 CONF_ACCESSKEY = 'accesskey'
 CONF_PASSWORD = 'password'

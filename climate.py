@@ -26,11 +26,14 @@ SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_PRESET_MODE)
 OPERATION_MANUAL = "Manual"
 OPERATION_CLOCK = "Clock"
 
-async def async_setup_platform(hass, hass_config, async_add_entities, discovery_info=None):
-    client = hass.data[DOMAIN]["client"]
-    config = hass.data[DOMAIN]["config"]
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
 
-    async_add_entities([NefitThermostat(client, config)], update_before_add=True)
+    for device in hass.data[DOMAIN]["devices"]:
+        client = device['client']
+        config = device['config']
+
+        async_add_entities([NefitThermostat(client, config)], update_before_add=True)
+
     _LOGGER.debug("climate: async_setup_platform done")
 
 
