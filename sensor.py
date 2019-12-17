@@ -16,21 +16,20 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
 
+    entities = []
     for device in hass.data[DOMAIN]["devices"]:
-        client = device['client']
         config = device['config']
 
-        entities = []
         for key in config[CONF_SENSORS]:
-            dev = SENSOR_TYPES[key]
+            typeconf = SENSOR_TYPES[key]
             if key == 'status':
-                entities.append(NefitStatus(client, key, dev))
+                entities.append(NefitStatus(device, key, typeconf))
             elif key == 'year_total':
-                entities.append(NefitYearTotal(client, key, dev))
+                entities.append(NefitYearTotal(device, key, typeconf))
             else:
-                entities.append(NefitSensor(client, key, dev))
+                entities.append(NefitSensor(device, key, typeconf))
 
-        async_add_entities(entities, True)
+    async_add_entities(entities, True)
 
     _LOGGER.debug("sensor: async_setup_platform done")
 
@@ -46,16 +45,16 @@ class NefitSensor(NefitDevice):
     @property
     def device_class(self):
         """Return the device class of the sensor."""
-        if 'device_class' in self._device:
-            return self._device['device_class']
+        if 'device_class' in self._typeconf:
+            return self._typeconf['device_class']
         else:
             return None
 
     @property
     def unit_of_measurement(self):
         """Return the unit of measurement of the sensor."""
-        if 'unit' in self._device:
-            return self._device['unit']
+        if 'unit' in self._typeconf:
+            return self._typeconf['unit']
         else:
             return None
 

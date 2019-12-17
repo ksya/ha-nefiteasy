@@ -29,40 +29,40 @@ icon = 'icon'
 
 SENSOR_TYPES = {
     'year_total': {
-        name: "Nefit Year total",
+        name: "Year total",
         url: '/ecus/rrc/recordings/yearTotal',
         unit: 'm3',
         icon: 'mdi:gas-cylinder'
     },
     'status': {
-        name: "Nefit status",
+        name: "status",
         url: '/system/appliance/displaycode'
     },
     'supply_temperature': {
-        name: "Nefit Supply temperature",
+        name: "Supply temperature",
         url: '/heatingCircuits/hc1/actualSupplyTemperature',
         unit: TEMP_CELSIUS,
         device_class: 'temperature'
     },
     'outdoor_temperature': {
-        name: "Nefit Outdoor temperature",
+        name: "Outdoor temperature",
         url: '/system/sensors/temperatures/outdoor_t1',
         unit: TEMP_CELSIUS,
         device_class: 'temperature'
     },
     'system_pressure': {
-        name: "Nefit CV pressure",
+        name: "CV pressure",
         url: '/system/appliance/systemPressure',
         unit: PRESSURE_BAR,
         device_class: 'pressure'
     },
     'active_program': {
-        name: "Nefit Active program",
+        name: "Active program",
         url: '/ecus/rrc/userprogram/activeprogram',
         icon: 'mdi:calendar-today'
     },
     'hot_water_operation': {
-        name: "Nefit Hot water operation",
+        name: "Hot water operation",
         url: '/dhwCircuits/dhwA/dhwOperationType'
     },
 }
@@ -70,41 +70,41 @@ SENSOR_TYPES = {
 
 SWITCH_TYPES = {
     'hot_water': {
-        name: "Nefit Hot water",
+        name: "Hot water",
         short: 'DHW',
         icon: 'mdi:water-boiler'
     },
     'holiday_mode': {
-        name: "Nefit Holiday mode",
+        name: "Holiday mode",
         url: '/heatingCircuits/hc1/holidayMode/status',
         short: 'HMD',
         icon: 'mdi:briefcase-outline'
     },
     'fireplace_mode': {
-        name: "Nefit Fireplace mode",
+        name: "Fireplace mode",
         url: '/ecus/rrc/userprogram/fireplacefunction',
         short: 'FPA',
         icon: 'mdi:fire'
     },
     'today_as_sunday': {
-        name: "Nefit Today as Sunday",
+        name: "Today as Sunday",
         url: '/ecus/rrc/dayassunday/day10/active',
         short: 'DAS',
         icon: 'mdi:calendar-star'
     },
     'tomorrow_as_sunday': {
-        name: "Nefit Tomorrow as Sunday",
+        name: "Tomorrow as Sunday",
         url: '/ecus/rrc/dayassunday/day11/active',
         short: 'TAS',
         icon: 'mdi:calendar-star'
     },
     'preheating': {
-        name: "Nefit Preheating",
+        name: "Preheating",
         url: '/ecus/rrc/userprogram/preheating',
         icon: 'mdi:calendar-clock'
     },
     'home_entrance_detection': {
-        name: "Nefit Presence {}",
+        name: "Presence {}",
         icon: 'mdi:account-check'
     },
 }

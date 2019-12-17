@@ -5,28 +5,29 @@ import logging
 from homeassistant.helpers.dispatcher import async_dispatcher_send, async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
-from .const import (DISPATCHER_ON_DEVICE_UPDATE)
+from .const import DISPATCHER_ON_DEVICE_UPDATE, CONF_NAME
 
 _LOGGER = logging.getLogger(__name__)
 
 class NefitDevice(Entity):
     """Representation of a Nefit device."""
 
-    def __init__(self, client, key, device):
+    def __init__(self, device, key, typeconf):
         """Initialize the sensor."""
-        self._client = client
-        self._device = device
+        self._client = device['client']
+        self._config = device['config']
+        self._typeconf = typeconf
         self._key = key
         self._unique_id = "%s_%s" % (self._client.nefit.serial_number, self._key)
 
-        client.events[key] = asyncio.Event()
+        self._client.events[key] = asyncio.Event()
         
-        if 'url' in device:
-            self._url = device['url']
-            client.keys[self._url] = key
+        if 'url' in typeconf:
+            self._url = typeconf['url']
+            self._client.keys[self._url] = key
 
-        if 'short' in device:
-            client.uiStatusVars[key] = device['short']
+        if 'short' in typeconf:
+            self._client.uiStatusVars[key] = typeconf['short']
 
         self._remove_callbacks: List[Callable[[], None]] = []
 
@@ -65,7 +66,7 @@ class NefitDevice(Entity):
     @property
     def name(self):
         """Return the name of the device. """
-        return self._device['name']
+        return "%s %s" % (self._config[CONF_NAME], self._typeconf['name'])
 
     @property
     def unique_id(self) -> str:
@@ -75,7 +76,7 @@ class NefitDevice(Entity):
     @property
     def should_poll(self) -> bool:
         """Enable polling if value does not exist in uiStatus"""
-        if 'short' in self._device:
+        if 'short' in self._typeconf:
             return False
         else:
             return True
@@ -83,8 +84,8 @@ class NefitDevice(Entity):
     @property
     def icon(self):
         """Return possible sensor specific icon."""
-        if 'icon' in self._device:
-            return self._device['icon']
+        if 'icon' in self._typeconf:
+            return self._typeconf['icon']
         
     def get_endpoint(self):
         """Return the API endpoint."""

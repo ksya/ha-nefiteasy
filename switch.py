@@ -18,38 +18,38 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     
+    entities = []
     for device in hass.data[DOMAIN]["devices"]:
-        client = device['client']
         config = device['config']
 
-        entities = []
         for key in config[CONF_SWITCHES]:
-            dev = SWITCH_TYPES[key]
+            typeconf = SWITCH_TYPES[key]
             if key == 'hot_water':
-                entities.append(NefitHotWater(client, key, dev))
+                entities.append(NefitHotWater(device, key, typeconf))
             elif key == 'home_entrance_detection':
-                await setup_home_entrance_detection(entities, client, key, dev)
+                await setup_home_entrance_detection(entities, device, key, typeconf)
             else:
-                entities.append(NefitSwitch(client, key, dev))
+                entities.append(NefitSwitch(device, key, typeconf))
 
-        async_add_entities(entities, True)
+    async_add_entities(entities, True)
 
     _LOGGER.debug("switch: async_setup_platform done")
 
 
-async def setup_home_entrance_detection(entities, client, basekey, basedev):
+async def setup_home_entrance_detection(entities, device, basekey, basetypeconf):
+    client = device['client']
     for i in range(0, 10):
         userprofile_id = 'userprofile{}'.format(i)
         endpoint = '/ecus/rrc/homeentrancedetection/{}/'.format(userprofile_id)
-        is_active = await client.get_value(userprofile_id, endpoint + 'active')
+        is_active = await device['client'].get_value(userprofile_id, endpoint + 'active')
         _LOGGER.debug("hed switch: is_active: " + str(is_active))
         if is_active == 'on':
-            name = await client.get_value(userprofile_id, endpoint + 'name')
-            dev = {}
-            dev['name'] = basedev['name'].format(name)
-            dev['url'] = endpoint + 'detected'
-            dev['icon'] = basedev['icon']
-            entities.append(NefitSwitch(client, '{}_{}'.format(basekey, userprofile_id), dev))
+            name = await device['client'].get_value(userprofile_id, endpoint + 'name')
+            typeconf = {}
+            typeconf['name'] = basetypeconf['name'].format(name)
+            typeconf['url'] = endpoint + 'detected'
+            typeconf['icon'] = basetypeconf['icon']
+            entities.append(NefitSwitch(device, '{}_{}'.format(basekey, userprofile_id), typeconf))
 
 
 class NefitSwitch(NefitDevice, SwitchDevice):
@@ -80,12 +80,12 @@ class NefitSwitch(NefitDevice, SwitchDevice):
 
 class NefitHotWater(NefitSwitch):
 
-    def __init__(self, client, key, device):
+    def __init__(self, device, key, typeconf):
         """Initialize the switch."""
-        super().__init__(client, key, device)
+        super().__init__(device, key, typeconf)
 
-        client.keys['/dhwCircuits/dhwA/dhwOperationClockMode'] = self._key
-        client.keys['/dhwCircuits/dhwA/dhwOperationManualMode'] = self._key
+        self._client.keys['/dhwCircuits/dhwA/dhwOperationClockMode'] = self._key
+        self._client.keys['/dhwCircuits/dhwA/dhwOperationManualMode'] = self._key
         
     def get_endpoint(self):
         endpoint = 'dhwOperationClockMode' if self._client.data.get('user_mode') == 'clock' else 'dhwOperationManualMode'

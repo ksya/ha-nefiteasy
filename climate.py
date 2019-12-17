@@ -28,28 +28,27 @@ OPERATION_CLOCK = "Clock"
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
 
+    entities = []
     for device in hass.data[DOMAIN]["devices"]:
-        client = device['client']
-        config = device['config']
+        entities.append(NefitThermostat(device))
 
-        async_add_entities([NefitThermostat(client, config)], update_before_add=True)
-
+    async_add_entities(entities, update_before_add=True)
     _LOGGER.debug("climate: async_setup_platform done")
 
 
 class NefitThermostat(ClimateDevice):
     """Representation of a NefitThermostat device."""
 
-    def __init__(self, client, config):
+    def __init__(self, device):
         """Initialize the thermostat."""
-        self._client = client
-        self._config = config
+        self._client = device['client']
+        self._config = device['config']
         self._key = 'uistatus'
         self._url = '/ecus/rrc/uiStatus'
-        self._unique_id = "%s_%s" % (self._client.nefit.serial_number, self._key)
+        self._unique_id = "%s_%s" % (self._client.nefit.serial_number, 'climate')
 
-        client.events[self._key] = asyncio.Event()
-        client.keys[self._url] = self._key
+        self._client.events[self._key] = asyncio.Event()
+        self._client.keys[self._url] = self._key
 
         self._unit_of_measurement = TEMP_CELSIUS
         self._data = {}

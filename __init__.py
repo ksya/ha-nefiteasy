@@ -30,18 +30,18 @@ CONNECTION_SCHEMA = vol.Schema(
         vol.Required(CONF_SERIAL): cv.string,
         vol.Required(CONF_ACCESSKEY): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_NAME, default="Nefit Easy"): cv.string,
+        vol.Optional(CONF_NAME, default="Nefit"): cv.string,
         vol.Optional(CONF_SENSORS, default=list(SENSOR_TYPES)):
         vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
         vol.Optional(CONF_SWITCHES, default=list(SWITCH_TYPES)):
         vol.All(cv.ensure_list, [vol.In(SWITCH_TYPES)]),
+        vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
+        vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
     })
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Required(CONF_DEVICES): vol.All(cv.ensure_list, [CONNECTION_SCHEMA]), # array of serial, accesskey, password
-        vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
-        vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -66,10 +66,10 @@ async def async_setup(hass, config):
 
         await client.connect()
 
-        for platform in ["climate", "sensor", "switch"]:
-            hass.async_create_task(
-                async_load_platform(hass, platform, DOMAIN, {}, device_conf)
-            )
+    for platform in ["climate", "sensor", "switch"]:
+        hass.async_create_task(
+            async_load_platform(hass, platform, DOMAIN, {}, device_conf)
+        )
 
     return True
 
