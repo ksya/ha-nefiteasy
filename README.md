@@ -56,7 +56,7 @@ nefiteasy:
       - preheating
 ```
 
-### Basic
+### Multiple devices
 ```
 nefiteasy:
   devices:
