@@ -7,8 +7,10 @@ Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng
 
 ## Installation
 
-Create ```custom_components/nefiteasy/``` in your homeassistant config directory and copy the files of this repository into this directory.
-Restart Home Assistant or Hass.io.
+1. Create ```custom_components/nefiteasy/``` in your homeassistant config directory.
+2. Copy the files of this repository into this directory.
+3. Add the config to your configuration.yaml file as explained below.
+4. Restart Home Assistant or Hass.io.
 
 ## Configuration
 
@@ -18,13 +20,13 @@ nefiteasy:
   - serial: 'XXXXXXXXX'
     accesskey: 'xxxxxxxxx'
     password: 'xxxxxxxxx'
-    name: Nefit Easy #below here all optional settings
-    min_temp: 15
-    max_temp: 27
-    sensors:
-     - #list of sensors to be exposed
-    switches:
-     - list of switches to be exposed
+    # name: Nefit Easy
+    # min_temp: 15
+    # max_temp: 27
+    # sensors:
+    #  - list of sensors to be exposed
+    # switches:
+    #  - list of switches to be exposed
 ```
 
 If any of your secrets in the configuration is numbers only, make sure to put it between quotes (`'`) to have homeassistant parse them correctly.
