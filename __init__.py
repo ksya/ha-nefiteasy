@@ -11,7 +11,6 @@ import voluptuous as vol
 
 #from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -65,6 +64,9 @@ async def async_setup(hass, config):
         device['config'] = device_conf
 
         await client.connect()
+        _LOGGER.debug('Is connected state? %s', client.connected_state)
+        if client.connected_state != STATE_CONNECTED:
+            return True
 
     for platform in ["climate", "sensor", "switch"]:
         hass.async_create_task(
@@ -86,6 +88,7 @@ class NefitEasy:
         self.hass = hass
         self.connected_state = STATE_INIT
         self.expected_end = False
+        self.serial = credentials.get(CONF_SERIAL)
 
         self.nefit = NefitCore(serial_number=credentials.get(CONF_SERIAL),
                        access_key=credentials.get(CONF_ACCESSKEY),
@@ -109,17 +112,17 @@ class NefitEasy:
         except concurrent.futures._base.TimeoutError:
             _LOGGER.debug("TimeoutError on waiting for connected event")
             self.hass.components.persistent_notification.create( 
-                'Timeout while connecting to Bosch cloud.',
-                title='Nefit error',
+                'Timeout while connecting {} to Bosch cloud.'.format(self.serial),
+                title='Nefit logon error',
                 notification_id='nefit_logon_error')
-            raise PlatformNotReady
         
-        if self.connected_state == STATE_ERROR_AUTH:
-            self.hass.components.persistent_notification.create( 
-                'Invalid credentials while connecting to Bosch cloud.',
-                title='Nefit error',
-                notification_id='nefit_logon_error')
-            raise PlatformNotReady
+        #test password for decrypting messages
+        _LOGGER.info("Testing connection")
+        self.nefit.get('/gateway/brandID')
+        try:
+            await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=30.0)
+        except concurrent.futures._base.TimeoutError:
+            _LOGGER.error("Did not get an update in time for testing connection.")
 
     def shutdown(self, event):
         _LOGGER.debug("Shutdown connection to Bosch cloud")
@@ -133,18 +136,31 @@ class NefitEasy:
         self.connected_state = STATE_ERROR_AUTH
         self.nefit.xmppclient.connected_event.set()
 
+        #disconnect, since nothing will work from now.
+        self.shutdown('auth_failed')
+
+        if event == 'auth_error_password':
+            self.hass.components.persistent_notification.create( 
+                'Invalid password for connecting {} to Bosch cloud.'.format(self.serial),
+                title='Nefit password error',
+                notification_id='nefit_password_error')
+        else:
+            self.hass.components.persistent_notification.create( 
+                'Invalid credentials (serial or accesskey) for connecting {} to Bosch cloud.'.format(self.serial),
+                title='Nefit authentication error',
+                notification_id='nefit_logon_error')
+
     def session_end_callback(self):
         """If connection is closed unexpectedly, try to reconnect"""
         if not self.expected_end:
             self.hass.components.persistent_notification.create( 
-                'Unexpected disconnect with Bosch server',
-                title='Nefit error',
+                'Unexpected disconnect of {} with Bosch server'.format(self.serial),
+                title='Nefit disconnect',
                 notification_id='nefit_disconnect')
             self.connect()
 
     def parse_message(self, data):
-        """Message received callback function for the XMPP client.
-        """
+        """Message received callback function for the XMPP client."""
         _LOGGER.debug("parse_message data %s", data)
         if not 'id' in data:
             _LOGGER.error("Unknown response received: %s", data)
@@ -161,6 +177,7 @@ class NefitEasy:
                 self.data['boiler_indicator'] = data['value']['BAI']  #for climate
                 self.data['last_update'] = data['value']['CTD']
 
+                # Update all sensors/switches when there is new data form uiStatus
                 for uikey in self.uiStatusVars:
                     self.updateDeviceValue(uikey, data['value'].get(self.uiStatusVars[uikey]))
 
