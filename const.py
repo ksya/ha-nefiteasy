@@ -17,6 +17,7 @@ CONF_SENSORS = 'sensors'
 DISPATCHER_ON_DEVICE_UPDATE = "nefiteasy_{key}_on_device_update"
 
 STATE_CONNECTED = 'connected'
+STATE_CONNECTION_VERIFIED = 'connection_verified'
 STATE_INIT = 'initializing'
 STATE_ERROR_AUTH = 'authentication_failed'
 

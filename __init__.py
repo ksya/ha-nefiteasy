@@ -19,7 +19,7 @@ from .const import (DOMAIN, CONF_DEVICES,
     CONF_SERIAL, CONF_ACCESSKEY, CONF_PASSWORD, CONF_NAME,
     CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_SWITCHES, CONF_SENSORS, 
     DISPATCHER_ON_DEVICE_UPDATE, 
-    STATE_CONNECTED, STATE_INIT, STATE_ERROR_AUTH, 
+    STATE_CONNECTED, STATE_CONNECTION_VERIFIED, STATE_INIT, STATE_ERROR_AUTH, 
     SENSOR_TYPES, SWITCH_TYPES)
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ async def async_setup(hass, config):
 
         await client.connect()
         _LOGGER.debug('Is connected state? %s', client.connected_state)
-        if client.connected_state != STATE_CONNECTED:
+        if client.connected_state != STATE_CONNECTION_VERIFIED:
             return True
 
     for platform in ["climate", "sensor", "switch"]:
@@ -100,29 +100,38 @@ class NefitEasy:
         self.nefit.session_end_callback = self.session_end_callback
 
     async def connect(self):
-        self.nefit.connect()
-        _LOGGER.debug("Waiting for connected event")        
-        try:
-            # await self.nefit.xmppclient.connected_event.wait()
-            await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=60.0)
-            self.connected_state = STATE_CONNECTED
-            _LOGGER.debug("adding stop listener")
-            self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP,
-                                            self.shutdown)
-        except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("TimeoutError on waiting for connected event")
-            self.hass.components.persistent_notification.create( 
-                'Timeout while connecting {} to Bosch cloud.'.format(self.serial),
-                title='Nefit logon error',
-                notification_id='nefit_logon_error')
-        
-        #test password for decrypting messages
-        _LOGGER.info("Testing connection")
-        self.nefit.get('/gateway/brandID')
-        try:
-            await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=30.0)
-        except concurrent.futures._base.TimeoutError:
-            _LOGGER.error("Did not get an update in time for testing connection.")
+        retriesA = 0
+        while self.connected_state != STATE_CONNECTION_VERIFIED and retriesA < 10:
+            self.nefit.connect()
+            _LOGGER.debug("Waiting for connected event")        
+            try:
+                # await self.nefit.xmppclient.connected_event.wait()
+                await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=5.0)
+                self.connected_state = STATE_CONNECTED
+                _LOGGER.debug("adding stop listener")
+                self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP,
+                                                self.shutdown)
+            except concurrent.futures._base.TimeoutError:
+                _LOGGER.debug("TimeoutError on waiting for connected event")
+                retriesA = retriesA + 1
+                self.hass.components.persistent_notification.create( 
+                    'Timeout while connecting {} to Bosch cloud.'.format(self.serial),
+                    title='Nefit logon error',
+                    notification_id='nefit_logon_error')
+            
+            #test password for decrypting messages
+            if self.connected_state == STATE_CONNECTED:
+                _LOGGER.info("Testing connection")
+                retriesB = 0
+                while self.connected_state != STATE_CONNECTION_VERIFIED and retriesB < 10:
+                    try:
+                        self.nefit.get('/gateway/brandID')
+                        await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=5.0)
+                        self.connected_state = STATE_CONNECTION_VERIFIED
+                        self.nefit.xmppclient.message_event.clear()
+                    except concurrent.futures._base.TimeoutError:
+                        _LOGGER.error("Did not get a response in time for testing connection.")
+                        retriesB = retriesB + 1
 
     def shutdown(self, event):
         _LOGGER.debug("Shutdown connection to Bosch cloud")
