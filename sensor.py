@@ -103,4 +103,4 @@ class NefitStatus(NefitSensor):
         if code in display_codes:
             return display_codes[code]
         else:
-            return 'unknown code '+code
+            return code

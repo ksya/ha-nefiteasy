@@ -5,6 +5,7 @@ https://home-assistant.io/components/xxxxxx/
 """
 
 import asyncio
+import concurrent
 import logging
 
 from homeassistant.components.climate import ClimateDevice
@@ -89,7 +90,11 @@ class NefitThermostat(ClimateDevice):
         event = self._client.events[self._key]
         event.clear() #clear old event
         self._client.nefit.get(self._url)
-        await asyncio.wait_for(event.wait(), timeout=9)
+        try:
+            await asyncio.wait_for(event.wait(), timeout=9)
+        except concurrent.futures._base.TimeoutError:
+            _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, 'climate')
+            event.clear() #clear event
 
     @property
     def name(self):

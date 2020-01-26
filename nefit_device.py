@@ -21,7 +21,8 @@ class NefitDevice(Entity):
         self._unique_id = "%s_%s" % (self._client.nefit.serial_number, self._key)
 
         self._client.events[key] = asyncio.Event()
-        
+        self._client.data[key] = None
+
         if 'url' in typeconf:
             self._url = typeconf['url']
             self._client.keys[self._url] = key
@@ -58,9 +59,9 @@ class NefitDevice(Entity):
         event.clear() #clear old event
         self._client.nefit.get(self.get_endpoint())
         try:
-            await asyncio.wait_for(event.wait(), timeout=10)
+            await asyncio.wait_for(event.wait(), timeout=9)
         except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("Did not get an update in time for %s.", self._key)
+            _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, self._key)
             event.clear() #clear event
         
     @property

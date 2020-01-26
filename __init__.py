@@ -68,6 +68,8 @@ async def async_setup(hass, config):
         if client.connected_state != STATE_CONNECTION_VERIFIED:
             return True
 
+    _LOGGER.info("Succesfully connected to all Nefit devices!")
+
     for platform in ["climate", "sensor", "switch"]:
         hass.async_create_task(
             async_load_platform(hass, platform, DOMAIN, {}, device_conf)
@@ -101,12 +103,11 @@ class NefitEasy:
 
     async def connect(self):
         retriesA = 0
-        while self.connected_state != STATE_CONNECTION_VERIFIED and retriesA < 10:
+        while self.connected_state != STATE_CONNECTION_VERIFIED and retriesA < 3:
             self.nefit.connect()
-            _LOGGER.debug("Waiting for connected event")        
+            _LOGGER.debug("Waiting for connected event")
             try:
-                # await self.nefit.xmppclient.connected_event.wait()
-                await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=5.0)
+                await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=60.0)
                 self.connected_state = STATE_CONNECTED
                 _LOGGER.debug("adding stop listener")
                 self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP,
@@ -114,24 +115,32 @@ class NefitEasy:
             except concurrent.futures._base.TimeoutError:
                 _LOGGER.debug("TimeoutError on waiting for connected event")
                 retriesA = retriesA + 1
-                self.hass.components.persistent_notification.create( 
-                    'Timeout while connecting {} to Bosch cloud.'.format(self.serial),
-                    title='Nefit logon error',
-                    notification_id='nefit_logon_error')
             
             #test password for decrypting messages
             if self.connected_state == STATE_CONNECTED:
                 _LOGGER.info("Testing connection")
                 retriesB = 0
-                while self.connected_state != STATE_CONNECTION_VERIFIED and retriesB < 10:
+                while self.connected_state != STATE_CONNECTION_VERIFIED and retriesB < 3:
                     try:
                         self.nefit.get('/gateway/brandID')
-                        await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=5.0)
+                        await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=30.0)
                         self.connected_state = STATE_CONNECTION_VERIFIED
                         self.nefit.xmppclient.message_event.clear()
                     except concurrent.futures._base.TimeoutError:
                         _LOGGER.error("Did not get a response in time for testing connection.")
                         retriesB = retriesB + 1
+                    except:
+                        _LOGGER.error("No connection while testing connection.")
+                        break
+
+        _LOGGER.info("Connected %s with %d retries and %d test retries.", self.serial, retriesA, retriesB)
+
+        if self.connected_state != STATE_CONNECTION_VERIFIED:
+            self.hass.components.persistent_notification.create( 
+                'Did not succeed in connecting {} to Bosch cloud after retrying 3 times.'.format(self.serial),
+                title='Nefit connect error',
+                notification_id='nefit_connect_error')
+
 
     def shutdown(self, event):
         _LOGGER.debug("Shutdown connection to Bosch cloud")
@@ -166,7 +175,9 @@ class NefitEasy:
                 'Unexpected disconnect of {} with Bosch server'.format(self.serial),
                 title='Nefit disconnect',
                 notification_id='nefit_disconnect')
-            self.connect()
+            #loop = asyncio.get_event_loop()
+            #loop.run_until_complete(self.connect())
+            #loop.close()
 
     def parse_message(self, data):
         """Message received callback function for the XMPP client."""
@@ -179,7 +190,7 @@ class NefitEasy:
             key = self.keys[data['id']]
             _LOGGER.debug("Got update for %s.", key)
 
-            if data['id'] == '/ecus/rrc/uiStatus':
+            if data['id'] == '/ecus/rrc/uiStatus' and self.connected_state == STATE_CONNECTION_VERIFIED:
                 self.data['temp_setpoint'] = float(data['value']['TSP']) #for climate
                 self.data['inhouse_temperature'] = float(data['value']['IHT'])  #for climate
                 self.data['user_mode'] = data['value']['UMD']  #for climate
