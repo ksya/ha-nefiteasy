@@ -126,14 +126,13 @@ class NefitEasy:
                         await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=30.0)
                         self.connected_state = STATE_CONNECTION_VERIFIED
                         self.nefit.xmppclient.message_event.clear()
+                        _LOGGER.info("Connected %s with %d retries and %d test retries.", self.serial, retriesA, retriesB)
                     except concurrent.futures._base.TimeoutError:
                         _LOGGER.error("Did not get a response in time for testing connection.")
                         retriesB = retriesB + 1
                     except:
                         _LOGGER.error("No connection while testing connection.")
                         break
-
-        _LOGGER.info("Connected %s with %d retries and %d test retries.", self.serial, retriesA, retriesB)
 
         if self.connected_state != STATE_CONNECTION_VERIFIED:
             self.hass.components.persistent_notification.create( 
