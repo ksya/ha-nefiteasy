@@ -17,7 +17,7 @@ from homeassistant.const import STATE_UNKNOWN, EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .const import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, DISPATCHER_ON_DEVICE_UPDATE
+from .const import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_TEMP_STEP, DISPATCHER_ON_DEVICE_UPDATE, STATE_CONNECTION_VERIFIED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class NefitThermostat(ClimateDevice):
 
     @property
     def target_temperature_step(self):
-        return 0.5
+        return self._config.get(CONF_TEMP_STEP)
 
     async def async_update(self):
         """Get latest data."""

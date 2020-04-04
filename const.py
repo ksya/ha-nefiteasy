@@ -11,6 +11,7 @@ CONF_PASSWORD = 'password'
 CONF_NAME = 'name'
 CONF_MIN_TEMP = 'min_temp'
 CONF_MAX_TEMP = 'max_temp'
+CONF_TEMP_STEP = 'temp_step'
 CONF_SWITCHES = 'switches'
 CONF_SENSORS = 'sensors'
 

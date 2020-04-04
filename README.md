@@ -23,6 +23,7 @@ nefiteasy:
     # name: Nefit Easy
     # min_temp: 15
     # max_temp: 27
+    # temp_step: 0.5
     # sensors:
     #  - list of sensors to be exposed
     # switches:

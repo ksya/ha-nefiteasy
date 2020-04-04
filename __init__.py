@@ -17,7 +17,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (DOMAIN, CONF_DEVICES,
     CONF_SERIAL, CONF_ACCESSKEY, CONF_PASSWORD, CONF_NAME,
-    CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_SWITCHES, CONF_SENSORS, 
+    CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_SWITCHES, CONF_SENSORS, CONF_TEMP_STEP,
     DISPATCHER_ON_DEVICE_UPDATE, 
     STATE_CONNECTED, STATE_CONNECTION_VERIFIED, STATE_INIT, STATE_ERROR_AUTH, 
     SENSOR_TYPES, SWITCH_TYPES)
@@ -36,6 +36,7 @@ CONNECTION_SCHEMA = vol.Schema(
         vol.All(cv.ensure_list, [vol.In(SWITCH_TYPES)]),
         vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
         vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
+        vol.Optional(CONF_TEMP_STEP, default=0.5): cv.small_float,
     })
 
 CONFIG_SCHEMA = vol.Schema({
