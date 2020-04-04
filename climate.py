@@ -86,15 +86,16 @@ class NefitThermostat(ClimateDevice):
 
     async def async_update(self):
         """Get latest data."""
-        _LOGGER.debug("async_update called for climate device")
-        event = self._client.events[self._key]
-        event.clear() #clear old event
-        self._client.nefit.get(self._url)
-        try:
-            await asyncio.wait_for(event.wait(), timeout=9)
-        except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, 'climate')
-            event.clear() #clear event
+        if self._client.connected_state == STATE_CONNECTION_VERIFIED:
+            _LOGGER.debug("async_update called for climate device")
+            event = self._client.events[self._key]
+            event.clear() #clear old event
+            self._client.nefit.get(self._url)
+            try:
+                await asyncio.wait_for(event.wait(), timeout=9)
+            except concurrent.futures._base.TimeoutError:
+                _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, 'climate')
+                event.clear() #clear event
 
     @property
     def name(self):

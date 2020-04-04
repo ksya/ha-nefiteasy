@@ -5,7 +5,7 @@ import logging
 from homeassistant.helpers.dispatcher import async_dispatcher_send, async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
-from .const import DISPATCHER_ON_DEVICE_UPDATE, CONF_NAME
+from .const import DISPATCHER_ON_DEVICE_UPDATE, CONF_NAME, STATE_CONNECTION_VERIFIED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,11 +76,14 @@ class NefitDevice(Entity):
 
     @property
     def should_poll(self) -> bool:
-        """Enable polling if value does not exist in uiStatus"""
-        if 'short' in self._typeconf:
-            return False
+        if self._client.connected_state == STATE_CONNECTION_VERIFIED:
+            """Enable polling if value does not exist in uiStatus"""
+            if 'short' in self._typeconf:
+                return False
+            else:
+                return True
         else:
-            return True
+            return False
 
     @property
     def icon(self):

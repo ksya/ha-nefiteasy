@@ -47,7 +47,7 @@ CONFIG_SCHEMA = vol.Schema({
 
 
 async def async_setup(hass, config):
-
+    _LOGGER.debug("Starting setup")
     nefit_data = hass.data[DOMAIN] = {}
     nefit_data['devices'] = []
 
@@ -58,22 +58,20 @@ async def async_setup(hass, config):
 
     for device_conf in conf[CONF_DEVICES]:
         credentials = dict(device_conf)
-        nefit_data['devices'].append({})
-        device = nefit_data['devices'][-1]
-        device['client'] = client = NefitEasy(hass, credentials)
-        device['config'] = device_conf
+        client = NefitEasy(hass, credentials)
 
         await client.connect()
         _LOGGER.debug('Is connected state? %s', client.connected_state)
-        if client.connected_state != STATE_CONNECTION_VERIFIED:
-            return True
+        
+        if client.connected_state == STATE_CONNECTION_VERIFIED:
+            nefit_data['devices'].append({'client': client, 'config': device_conf})
+            _LOGGER.info("Succesfully connected %s to Nefit device!", credentials.get(CONF_SERIAL))
 
-    _LOGGER.info("Succesfully connected to all Nefit devices!")
-
-    for platform in ["climate", "sensor", "switch"]:
-        hass.async_create_task(
-            async_load_platform(hass, platform, DOMAIN, {}, device_conf)
-        )
+    if len(nefit_data['devices']) > 0:
+        for platform in ["climate", "sensor", "switch"]:
+            hass.async_create_task(
+                async_load_platform(hass, platform, DOMAIN, {}, device_conf)
+            )
 
     return True
 
@@ -90,6 +88,7 @@ class NefitEasy:
         self.hass = hass
         self.connected_state = STATE_INIT
         self.expected_end = False
+        self.is_connecting = False
         self.serial = credentials.get(CONF_SERIAL)
 
         self.nefit = NefitCore(serial_number=credentials.get(CONF_SERIAL),
@@ -101,60 +100,82 @@ class NefitEasy:
         self.nefit.no_content_callback = self.no_content_callback
         self.nefit.session_end_callback = self.session_end_callback
 
+        #self.hass.services.register(DOMAIN, "test_disconnect", self.nefit.disconnect)
+
     async def connect(self):
-        retriesA = 0
-        while self.connected_state != STATE_CONNECTION_VERIFIED and retriesA < 3:
-            self.nefit.connect()
-            _LOGGER.debug("Waiting for connected event")
-            try:
-                await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=60.0)
-                self.connected_state = STATE_CONNECTED
-                _LOGGER.debug("adding stop listener")
-                self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP,
-                                                self.shutdown)
-            except concurrent.futures._base.TimeoutError:
-                _LOGGER.debug("TimeoutError on waiting for connected event")
-                retriesA = retriesA + 1
+        _LOGGER.debug("Starting connecting..")
+        if not self.is_connecting:
+            self.is_connecting = True
+            retries_connection = 0
+
+            while self.connected_state != STATE_CONNECTED and retries_connection < 3:
+                await self.nefit.connect()
+                _LOGGER.debug("Waiting for connected event")
+                try:
+                    await asyncio.wait_for(self.nefit.xmppclient.connected_event.wait(), timeout=29.0)
+                    self.connected_state = STATE_CONNECTED
+                    _LOGGER.debug("adding stop listener")
+                    self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP,
+                                                    self.shutdown)
+                except concurrent.futures._base.TimeoutError:
+                    _LOGGER.debug("TimeoutError on waiting for connected event (connection retries=%d)", retries_connection)
+                    retries_connection = retries_connection + 1
+                except:
+                    _LOGGER.debug("Unknown error")
             
-            #test password for decrypting messages
+            #test password for decrypting messages if connected
             if self.connected_state == STATE_CONNECTED:
-                _LOGGER.info("Testing connection")
-                retriesB = 0
-                while self.connected_state != STATE_CONNECTION_VERIFIED and retriesB < 3:
+                _LOGGER.info("Testing connection (connect retries=%d)", retries_connection)
+                retries_validation = 0
+                while self.connected_state != STATE_CONNECTION_VERIFIED and retries_validation < 3:
                     try:
                         self.nefit.get('/gateway/brandID')
-                        await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=30.0)
-                        self.connected_state = STATE_CONNECTION_VERIFIED
+                        await asyncio.wait_for(self.nefit.xmppclient.message_event.wait(), timeout=29.0)
                         self.nefit.xmppclient.message_event.clear()
-                        _LOGGER.info("Connected %s with %d retries and %d test retries.", self.serial, retriesA, retriesB)
+                        
+                        if self.connected_state == STATE_ERROR_AUTH:
+                            self.is_connecting = False
+                            return
+                            
+                        self.connected_state = STATE_CONNECTION_VERIFIED
+                        _LOGGER.info("Connected %s with %d retries and %d test retries.", self.serial, retries_connection, retries_validation)
                     except concurrent.futures._base.TimeoutError:
-                        _LOGGER.error("Did not get a response in time for testing connection.")
-                        retriesB = retriesB + 1
+                        _LOGGER.error("Did not get a response in time for testing connection (validation retries=%d).", retries_validation)
+                        retries_validation = retries_validation + 1
                     except:
                         _LOGGER.error("No connection while testing connection.")
                         break
 
-        if self.connected_state != STATE_CONNECTION_VERIFIED:
-            self.hass.components.persistent_notification.create( 
-                'Did not succeed in connecting {} to Bosch cloud after retrying 3 times.'.format(self.serial),
-                title='Nefit connect error',
-                notification_id='nefit_connect_error')
+            if self.connected_state != STATE_CONNECTION_VERIFIED:
+                self.hass.components.persistent_notification.create( 
+                    'Did not succeed in connecting {} to Bosch cloud after retrying 3 times. Retry in 30 seconds.'.format(self.serial),
+                    title='Nefit connect error',
+                    notification_id='nefit_connect_error')
+                self.is_connecting = False
+
+                #wait 30 seconds to retry
+                await asyncio.sleep(30)
+                await self.connect()
+
+            self.is_connecting = False
+        else:
+            _LOGGER.debug("Connection procedure was already running..")
 
 
-    def shutdown(self, event):
+    async def shutdown(self, event):
         _LOGGER.debug("Shutdown connection to Bosch cloud")
         self.expected_end = True
-        self.nefit.disconnect()
+        await self.nefit.disconnect()
 
-    def no_content_callback(self, data):
+    async def no_content_callback(self, data):
         _LOGGER.debug("no_content_callback: %s", data)
 
-    def failed_auth_handler(self, event):
+    async def failed_auth_handler(self, event):
         self.connected_state = STATE_ERROR_AUTH
         self.nefit.xmppclient.connected_event.set()
 
         #disconnect, since nothing will work from now.
-        self.shutdown('auth_failed')
+        await self.shutdown('auth_failed')
 
         if event == 'auth_error_password':
             self.hass.components.persistent_notification.create( 
@@ -167,18 +188,23 @@ class NefitEasy:
                 title='Nefit authentication error',
                 notification_id='nefit_logon_error')
 
-    def session_end_callback(self):
+    async def session_end_callback(self):
         """If connection is closed unexpectedly, try to reconnect"""
         if not self.expected_end:
             self.hass.components.persistent_notification.create( 
-                'Unexpected disconnect of {} with Bosch server'.format(self.serial),
+                'Unexpected disconnect of {} with Bosch server. Try to reconnect..'.format(self.serial),
                 title='Nefit disconnect',
                 notification_id='nefit_disconnect')
-            #loop = asyncio.get_event_loop()
-            #loop.run_until_complete(self.connect())
-            #loop.close()
 
-    def parse_message(self, data):
+            _LOGGER.info("Starting reconnect procedure.")
+            # Reset values
+            self.connected_state = STATE_INIT
+            self.expected_end = False
+
+            # Retry connection
+            await self.connect()
+
+    async def parse_message(self, data):
         """Message received callback function for the XMPP client."""
         _LOGGER.debug("parse_message data %s", data)
         if not 'id' in data:
