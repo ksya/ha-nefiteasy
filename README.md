@@ -7,10 +7,16 @@ Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng
 
 ## Installation
 
-1. Create ```custom_components/nefiteasy/``` in your homeassistant config directory.
-2. Copy the files of this repository into this directory.
-3. Add the config to your configuration.yaml file as explained below.
-4. Restart Home Assistant or Hass.io.
+1. Copy the folder ```custom_components/nefiteasy/``` to your homeassistant config directory.
+2. Add the config to your configuration.yaml file as explained below.
+3. Restart Home Assistant or Hass.io.
+
+## Alternative install using HACS
+1. Add "https://github.com/ksya/ha-nefiteasy" to your custom repositories in the Settings tab of HACS. 
+2. Choose "Integration".
+3. Press the "save" button.
+4. Go to the integrations tab and search for Nefit Easy.
+5. Click and install from there.
 
 ## Configuration
 
