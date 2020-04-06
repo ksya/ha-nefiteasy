@@ -17,7 +17,7 @@ from homeassistant.const import STATE_UNKNOWN, EVENT_HOMEASSISTANT_STOP
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .const import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, DISPATCHER_ON_DEVICE_UPDATE
+from .const import DOMAIN, CONF_NAME, CONF_MIN_TEMP, CONF_MAX_TEMP, CONF_TEMP_STEP, DISPATCHER_ON_DEVICE_UPDATE, STATE_CONNECTION_VERIFIED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,19 +82,20 @@ class NefitThermostat(ClimateDevice):
 
     @property
     def target_temperature_step(self):
-        return 0.5
+        return self._config.get(CONF_TEMP_STEP)
 
     async def async_update(self):
         """Get latest data."""
-        _LOGGER.debug("async_update called for climate device")
-        event = self._client.events[self._key]
-        event.clear() #clear old event
-        self._client.nefit.get(self._url)
-        try:
-            await asyncio.wait_for(event.wait(), timeout=9)
-        except concurrent.futures._base.TimeoutError:
-            _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, 'climate')
-            event.clear() #clear event
+        if self._client.connected_state == STATE_CONNECTION_VERIFIED:
+            _LOGGER.debug("async_update called for climate device")
+            event = self._client.events[self._key]
+            event.clear() #clear old event
+            self._client.nefit.get(self._url)
+            try:
+                await asyncio.wait_for(event.wait(), timeout=9)
+            except concurrent.futures._base.TimeoutError:
+                _LOGGER.debug("Did not get an update in time for %s %s.", self._client.serial, 'climate')
+                event.clear() #clear event
 
     @property
     def name(self):
