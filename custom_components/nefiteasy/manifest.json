@@ -8,6 +8,6 @@
     "@marconfus"
   ],
   "requirements": [
-    "aionefit==0.7"
+    "aionefit==0.8"
   ]
 }
