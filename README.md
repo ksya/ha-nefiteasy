@@ -80,10 +80,30 @@ nefiteasy:
 ```
 
 ## Available sensors & switches
-See const.py file.
+### Sensors
+```
+- year_total
+- status
+- supply_temperature
+- outdoor_temperature
+- system_pressure
+- active_program
+- hot_water_operation
+```
+
+### Switches
+```
+- hot_water
+- holiday_mode
+- fireplace_mode
+- today_as_sunday
+- tomorrow_as_sunday
+- preheating
+- home_entrance_detection
+```
 
 ## Debugging problems
-
+Turn on debug for both aionefit as custom_components.nefiteasy:
 ```
 logger:
   default: info
