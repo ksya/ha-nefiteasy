@@ -8,7 +8,10 @@ import asyncio
 import concurrent
 import logging
 
-from homeassistant.components.climate import ClimateDevice
+try:
+    from homeassistant.components.climate import ClimateEntity
+except ImportError:
+    from homeassistant.components.climate import ClimateDevice as ClimateEntity
 from homeassistant.components.climate.const import (SUPPORT_TARGET_TEMPERATURE, SUPPORT_PRESET_MODE,
     CURRENT_HVAC_IDLE, CURRENT_HVAC_HEAT,
     HVAC_MODE_HEAT)
@@ -37,7 +40,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     _LOGGER.debug("climate: async_setup_platform done")
 
 
-class NefitThermostat(ClimateDevice):
+class NefitThermostat(ClimateEntity):
     """Representation of a NefitThermostat device."""
 
     def __init__(self, device):
@@ -99,7 +102,7 @@ class NefitThermostat(ClimateDevice):
 
     @property
     def name(self):
-        """Return the name of the ClimateDevice.
+        """Return the name of the ClimateEntity.
         """
         return self._config.get(CONF_NAME)
 
