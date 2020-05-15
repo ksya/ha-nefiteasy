@@ -9,8 +9,8 @@ from .const import DISPATCHER_ON_DEVICE_UPDATE, CONF_NAME, STATE_CONNECTION_VERI
 
 _LOGGER = logging.getLogger(__name__)
 
-class NefitDevice(Entity):
-    """Representation of a Nefit device."""
+class NefitEntity(Entity):
+    """Representation of a Nefit entity."""
 
     def __init__(self, device, key, typeconf):
         """Initialize the sensor."""
