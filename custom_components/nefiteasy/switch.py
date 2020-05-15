@@ -7,7 +7,10 @@ https://home-assistant.io/components/xxxxxx/
 import asyncio
 import logging
 
-from homeassistant.components.switch import SwitchDevice
+try:
+    from homeassistant.components.switch import SwitchEntity
+except ImportError:
+    from homeassistant.components.switch import SwitchDevice as SwitchEntity
 from homeassistant.const import STATE_OFF, STATE_ON
 
 from .const import DOMAIN, CONF_SWITCHES, SWITCH_TYPES
@@ -52,7 +55,7 @@ async def setup_home_entrance_detection(entities, device, basekey, basetypeconf)
             entities.append(NefitSwitch(device, '{}_{}'.format(basekey, userprofile_id), typeconf))
 
 
-class NefitSwitch(NefitDevice, SwitchDevice):
+class NefitSwitch(NefitDevice, SwitchEntity):
     """Representation of a NefitSwitch device."""
 
     @property
