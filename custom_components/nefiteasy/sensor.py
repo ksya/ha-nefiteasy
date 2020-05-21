@@ -9,7 +9,7 @@ import logging
 #from homeassistant.core import callback
 
 from .const import DOMAIN, CONF_SENSORS, SENSOR_TYPES
-from .nefit_device import NefitDevice
+from .nefit_entity import NefitEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,8 +34,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     _LOGGER.debug("sensor: async_setup_platform done")
 
 
-class NefitSensor(NefitDevice):
-    """Representation of a NefitSensor device."""
+class NefitSensor(NefitEntity):
+    """Representation of a NefitSensor entity."""
 
     @property
     def state(self):
