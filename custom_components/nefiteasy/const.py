@@ -109,4 +109,9 @@ SWITCH_TYPES = {
         name: "Presence {}",
         icon: 'mdi:account-check'
     },
+    'weather_dependent': {
+        name: "Weather dependent",
+        url: '/heatingCircuits/hc1/control',
+        icon: 'mdi:weather-partly-snowy-rainy'
+    }
 }
