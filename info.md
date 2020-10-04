@@ -82,6 +82,8 @@ nefiteasy:
 - tomorrow_as_sunday
 - preheating
 - home_entrance_detection
+- weather_dependent
+- lockui
 ```
 
 ## Debugging problems

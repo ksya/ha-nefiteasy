@@ -29,6 +29,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             typeconf = SWITCH_TYPES[key]
             if key == 'hot_water':
                 entities.append(NefitHotWater(device, key, typeconf))
+            elif key == 'lockui':
+                entities.append(NefitSwitchTrueFalse(device, key, typeconf))
             elif key == 'weather_dependent':
                 entities.append(NefitWeatherDependent(device, key, typeconf))
             elif key == 'home_entrance_detection':
@@ -115,3 +117,23 @@ class NefitWeatherDependent(NefitSwitch):
         self._client.nefit.put_value(self.get_endpoint(), "room")
 
         _LOGGER.debug("Switch weather dependent OFF, endpoint=%s.", self._key, self.get_endpoint())
+
+
+class NefitSwitchTrueFalse(NefitEntity, SwitchEntity):
+
+    @property
+    def is_on(self):
+        """Get whether the switch is in on state."""
+        return self._client.data[self._key] == 'true'
+
+    async def async_turn_on(self, **kwargs) -> None:
+        """Turn the entity on."""
+        self._client.nefit.put_value(self.get_endpoint(), "true")
+
+        _LOGGER.debug("Switch Nefit %s ON, endpoint=%s.", self._key, self.get_endpoint())
+
+    async def async_turn_off(self, **kwargs) -> None:
+        """Turn the entity off."""
+        self._client.nefit.put_value(self.get_endpoint(), "false")
+
+        _LOGGER.debug("Switch Nefit %s OFF, endpoint=%s.", self._key, self.get_endpoint())
