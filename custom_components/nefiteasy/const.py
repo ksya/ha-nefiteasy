@@ -53,7 +53,7 @@ SENSOR_TYPES = {
         device_class: 'temperature'
     },
     'system_pressure': {
-        name: "CV pressure",
+        name: "System pressure",
         url: '/system/appliance/systemPressure',
         unit: PRESSURE_BAR,
         device_class: 'pressure'
