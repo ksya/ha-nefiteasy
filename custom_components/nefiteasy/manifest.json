@@ -9,5 +9,6 @@
   ],
   "requirements": [
     "aionefit==0.14"
-  ]
+  ],
+  "config_flow": false
 }
