@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
@@ -19,6 +19,7 @@ from .const import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
     CONF_NAME,
+    CONF_SERIAL,
     CONF_TEMP_STEP,
     DISPATCHER_ON_DEVICE_UPDATE,
     DOMAIN,
@@ -188,6 +189,15 @@ class NefitThermostat(ClimateEntity):
     def max_temp(self):
         """Return the maximum temperature."""
         return self._config.get(CONF_MAX_TEMP)
+
+    @property
+    def device_info(self) -> Dict[str, any]:
+        """Return the device information."""
+        return {
+            "identifiers": {(DOMAIN, self._config[CONF_SERIAL])},
+            "name": self._config[CONF_NAME],
+            "manufacturer": "Bosch",
+        }
 
     async def async_set_preset_mode(self, preset_mode):
         """Set new target operation mode."""

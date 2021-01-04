@@ -2,12 +2,18 @@
 
 import asyncio
 import logging
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
-from .const import CONF_NAME, DISPATCHER_ON_DEVICE_UPDATE, STATE_CONNECTION_VERIFIED
+from .const import (
+    CONF_NAME,
+    CONF_SERIAL,
+    DISPATCHER_ON_DEVICE_UPDATE,
+    DOMAIN,
+    STATE_CONNECTION_VERIFIED,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,7 +83,7 @@ class NefitEntity(Entity):
     @property
     def name(self):
         """Return the name of the device."""
-        return "{} {}".format(self._config[CONF_NAME], self._typeconf["name"])
+        return f'{self._config[CONF_NAME]} {self._typeconf["name"]}'
 
     @property
     def unique_id(self) -> str:
@@ -105,3 +111,12 @@ class NefitEntity(Entity):
     def get_endpoint(self):
         """Return the API endpoint."""
         return self._url
+
+    @property
+    def device_info(self) -> Dict[str, any]:
+        """Return the device information."""
+        return {
+            "identifiers": {(DOMAIN, self._config[CONF_SERIAL])},
+            "name": self._config[CONF_NAME],
+            "manufacturer": "Bosch",
+        }

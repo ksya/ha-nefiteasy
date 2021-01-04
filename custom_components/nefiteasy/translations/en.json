@@ -9,11 +9,18 @@
             "unknown": "Unexpected error"
         },
         "step": {
+            "options": {
+                "data": {
+                    "max_temp": "Maximum temperature",
+                    "min_temp": "Minimum temperature",
+                    "temp_step": "Temperature step"
+                }
+            },
             "user": {
                 "data": {
-                    "host": "Host",
+                    "accesskey": "Access key",
                     "password": "Password",
-                    "username": "Username"
+                    "serial": "Serial number"
                 }
             }
         }
