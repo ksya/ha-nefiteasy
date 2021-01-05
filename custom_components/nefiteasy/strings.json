@@ -4,9 +4,16 @@
     "step": {
       "user": {
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
+          "serial": "Serial number",
+          "accesskey": "Access key",
           "password": "[%key:common::config_flow::data::password%]"
+        }
+      },
+      "options": {
+        "data": {
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "temp_step": "Temperature step"
         }
       }
     },

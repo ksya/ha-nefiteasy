@@ -136,7 +136,7 @@ async def async_unload_entry(hass, entry: config_entries.ConfigEntry):
 
     client = hass.data[DOMAIN][entry.entry_id]["client"]
 
-    await client.shutdown()
+    await client.shutdown("Unload entry")
 
     hass.data[DOMAIN].pop(entry.entry_id)
 
