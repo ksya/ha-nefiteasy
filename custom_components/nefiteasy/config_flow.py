@@ -68,8 +68,6 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_SERIAL: self._serial,
                 CONF_ACCESSKEY: self._accesskey,
                 CONF_PASSWORD: self._password,
-                CONF_SENSORS: list(SENSOR_TYPES),
-                CONF_SWITCHES: list(SWITCH_TYPES),
                 CONF_MIN_TEMP: user_input[CONF_MIN_TEMP],
                 CONF_MAX_TEMP: user_input[CONF_MAX_TEMP],
                 CONF_TEMP_STEP: user_input[CONF_TEMP_STEP],
