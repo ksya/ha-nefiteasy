@@ -15,8 +15,6 @@ CONF_TEMP_STEP = "temp_step"
 CONF_SWITCHES = "switches"
 CONF_SENSORS = "sensors"
 
-DISPATCHER_ON_DEVICE_UPDATE = "nefiteasy_{key}_on_device_update"
-
 STATE_CONNECTED = "connected"
 STATE_CONNECTION_VERIFIED = "connection_verified"
 STATE_INIT = "initializing"
