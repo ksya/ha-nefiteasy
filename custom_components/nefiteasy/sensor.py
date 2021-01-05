@@ -18,7 +18,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
     data = config_entry.data
 
-    for key in data[CONF_SENSORS]:
+    for key in SENSOR_TYPES:
         typeconf = SENSOR_TYPES[key]
         if key == "status":
             entities.append(NefitStatus(client, data, key, typeconf))

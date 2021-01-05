@@ -17,7 +17,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
     data = config_entry.data
 
-    for key in data[CONF_SWITCHES]:
+    for key in SWITCH_TYPES:
         typeconf = SWITCH_TYPES[key]
         if key == "hot_water":
             entities.append(NefitHotWater(client, data, key, typeconf))
