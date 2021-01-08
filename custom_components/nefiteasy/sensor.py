@@ -2,7 +2,7 @@
 
 import logging
 
-from .const import CONF_SENSORS, DOMAIN, SENSOR_TYPES
+from .const import DOMAIN, SENSOR_TYPES
 from .nefit_entity import NefitEntity
 
 _LOGGER = logging.getLogger(__name__)

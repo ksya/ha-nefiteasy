@@ -190,6 +190,7 @@ class NefitEasy(DataUpdateCoordinator):
         )
 
     async def add_key(self, key, typeconf):
+        """Add key to list of endpoints."""
         if url in typeconf:
             self._urls[typeconf[url]] = {"key": key, short: typeconf.get(short)}
         elif short in typeconf:
@@ -356,16 +357,18 @@ class NefitEasy(DataUpdateCoordinator):
             and self.connected_state == STATE_CONNECTION_VERIFIED
         ):
             self._data[self._urls[data["id"]]["key"]] = data["value"]
+        else:
+            return
 
         if self._request == data["id"]:
             self._event.set()
+        else:
+            self.async_set_updated_data(self._data)
 
     async def _async_update_data(self):
         """Update data via library."""
         if self.connected_state != STATE_CONNECTION_VERIFIED:
             raise UpdateFailed("Nefit easy not connected!")
-
-        self._data = {}
 
         url = "/ecus/rrc/uiStatus"
         await self._async_get_url(url)

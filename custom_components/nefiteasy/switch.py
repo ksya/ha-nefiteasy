@@ -4,7 +4,7 @@ import logging
 
 from homeassistant.components.switch import SwitchEntity
 
-from .const import CONF_SWITCHES, DOMAIN, SWITCH_TYPES
+from .const import DOMAIN, SWITCH_TYPES
 from .nefit_entity import NefitEntity
 
 _LOGGER = logging.getLogger(__name__)
