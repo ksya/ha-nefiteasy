@@ -374,7 +374,7 @@ class NefitEasy(DataUpdateCoordinator):
         await self._async_get_url(url)
 
         if self._presence_init is False:
-            if "home_entrance_detection" in self._config[CONF_SWITCHES]:
+            if "home_entrance_detection" in self._urls:
                 await self._async_init_presence()
             self._presence_init = True
 
