@@ -12,13 +12,9 @@ from .const import (  # pylint:disable=unused-import
     CONF_MIN_TEMP,
     CONF_NAME,
     CONF_PASSWORD,
-    CONF_SENSORS,
     CONF_SERIAL,
-    CONF_SWITCHES,
     CONF_TEMP_STEP,
     DOMAIN,
-    SENSOR_TYPES,
-    SWITCH_TYPES,
 )
 
 _LOGGER = logging.getLogger(__name__)

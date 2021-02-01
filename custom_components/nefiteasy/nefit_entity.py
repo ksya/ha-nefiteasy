@@ -54,4 +54,4 @@ class NefitEntity(CoordinatorEntity):
 
     def get_endpoint(self):
         """Get end point."""
-        return self._typeconf["url"]
+        return self._typeconf[url]

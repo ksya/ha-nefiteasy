@@ -167,7 +167,9 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
             self.coordinator.nefit.xmppclient.message_event.wait(), timeout=9
         )
         self.coordinator.nefit.xmppclient.message_event.clear()
-        self.coordinator.data["user_mode"] = new_mode
+
+        self.coordinator.nefit.get("/ecus/rrc/uiStatus")
+        await self.coordinator.update_ui_status_later(2)
 
     async def async_set_temperature(self, **kwargs):
         """Set new target temperature."""
@@ -178,3 +180,5 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
             self.coordinator.nefit.xmppclient.message_event.wait(), timeout=9
         )
         self.coordinator.nefit.xmppclient.message_event.clear()
+
+        self.coordinator.nefit.get("/ecus/rrc/uiStatus")
