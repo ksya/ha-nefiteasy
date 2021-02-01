@@ -393,6 +393,10 @@ class NefitEasy(DataUpdateCoordinator):
                     f"/ecus/rrc/homeentrancedetection/userprofile{i}/detected"
                 ] = {}
 
+    async def update_ui_status_later(self, delay):
+        """Force update of uiStatus after delay."""
+        self.hass.loop.call_later(delay, self.nefit.get, "/ecus/rrc/uiStatus")
+
     async def _async_get_url(self, url):
         self._event.clear()
         self._request = url
