@@ -26,7 +26,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         elif key == "weather_dependent":
             entities.append(NefitSwitch(client, data, key, typeconf, "weather", "room"))
         elif key == "home_entrance_detection":
-            await client.init_presence_detection()
+            continue
         else:
             entities.append(NefitSwitch(client, data, key, typeconf))
 

@@ -196,12 +196,6 @@ class NefitEasy(DataUpdateCoordinator):
         elif short in typeconf:
             self._status_keys[typeconf[short]] = key
 
-    async def init_presence_detection(self):
-        """Init presence detection."""
-        if self._presence_init is False:
-            await self._async_init_presence()
-            self._presence_init = True
-
     async def connect(self):
         """Connect to nefit easy."""
         _LOGGER.debug("Starting connecting..")
@@ -378,6 +372,10 @@ class NefitEasy(DataUpdateCoordinator):
 
         url = "/ecus/rrc/uiStatus"
         await self._async_get_url(url)
+
+        if self._presence_init is False:
+            await self._async_init_presence()
+            self._presence_init = True
 
         for url in self._urls:
             await self._async_get_url(url)
