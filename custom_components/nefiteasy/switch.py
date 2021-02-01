@@ -22,42 +22,31 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         if key == "hot_water":
             entities.append(NefitHotWater(client, data, key, typeconf))
         elif key == "lockui":
-            entities.append(NefitSwitchTrueFalse(client, data, key, typeconf))
+            entities.append(NefitSwitch(client, data, key, typeconf, "true", "false"))
         elif key == "weather_dependent":
-            entities.append(NefitWeatherDependent(client, data, key, typeconf))
+            entities.append(NefitSwitch(client, data, key, typeconf, "weather", "room"))
         elif key == "home_entrance_detection":
-            continue
-        #    await setup_home_entrance_detection(entities, client, data, key, typeconf)
+            await client.init_presence_detection()
         else:
             entities.append(NefitSwitch(client, data, key, typeconf))
 
     async_add_entities(entities, True)
 
 
-async def setup_home_entrance_detection(entities, client, data, basekey, basetypeconf):
-    """Home entrance detection setup."""
-    for i in range(0, 10):
-        if f"presence{i}_name" in client.coordinator.data:
-            name = client.coordinator.data[f"presence{i}_name"]
-            endpoint = f"/ecus/rrc/homeentrancedetection/userprofile{i}/detected"
-
-            typeconf = {}
-            typeconf["name"] = basetypeconf["name"].format(name)
-            typeconf["url"] = endpoint
-            typeconf["icon"] = basetypeconf["icon"]
-
-            entities.append(
-                NefitSwitch(client, data, f"presence{i}_detected", typeconf)
-            )
-
-
 class NefitSwitch(NefitEntity, SwitchEntity):
     """Representation of a NefitSwitch entity."""
+
+    def __init__(self, client, data, key, typeconf, on_value="on", off_value="off"):
+        """Init Nefit Switch."""
+        super().__init__(client, data, key, typeconf)
+
+        self._on_value = on_value
+        self._off_value = off_value
 
     @property
     def is_on(self):
         """Get whether the switch is in on state."""
-        return self.coordinator.data.get(self._key) == "on"
+        return self.coordinator.data.get(self._key) == self._on_value
 
     @property
     def assumed_state(self) -> bool:
@@ -66,79 +55,39 @@ class NefitSwitch(NefitEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the entity on."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "on")
+        self.coordinator.nefit.put_value(self.get_endpoint(), self._on_value)
+
+        self.coordinator.nefit.get(self.get_endpoint())
 
         _LOGGER.debug(
-            "Switch Nefit %s ON, endpoint=%s.", self._key, self.get_endpoint()
+            "Switch Nefit %s to %s, endpoint=%s.",
+            self._key,
+            self._on_value,
+            self.get_endpoint(),
         )
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the entity off."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "off")
+        self.coordinator.nefit.put_value(self.get_endpoint(), self._off_value)
+
+        self.coordinator.nefit.get(self.get_endpoint())
 
         _LOGGER.debug(
-            "Switch Nefit %s OFF, endpoint=%s.", self._key, self.get_endpoint()
+            "Switch Nefit %s to %s, endpoint=%s.",
+            self._key,
+            self._off_value,
+            self.get_endpoint(),
         )
 
 
 class NefitHotWater(NefitSwitch):
     """Class for nefit hot water entity."""
 
-    def __init__(self, client, data, key, typeconf):
-        """Initialize the switch."""
-        super().__init__(client, data, key, typeconf)
-
     def get_endpoint(self):
         """Get end point."""
         endpoint = (
-            "dhwOperationClockMode"
+            "dhwOperationManualMode"
             if self.coordinator.data.get("user_mode") == "clock"
             else "dhwOperationManualMode"
         )
         return "/dhwCircuits/dhwA/" + endpoint
-
-
-class NefitWeatherDependent(NefitSwitch):
-    """Class for nefit weather dependent entity."""
-
-    @property
-    def is_on(self):
-        """Get whether the switch is in on state."""
-        return self.coordinator.data.get(self._key) == "weather"
-
-    async def async_turn_on(self, **kwargs) -> None:
-        """Turn the entity on."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "weather")
-
-        _LOGGER.debug("Switch weather dependent ON, endpoint=%s.", self.get_endpoint())
-
-    async def async_turn_off(self, **kwargs) -> None:
-        """Turn the entity off."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "room")
-
-        _LOGGER.debug("Switch weather dependent OFF, endpoint=%s.", self.get_endpoint())
-
-
-class NefitSwitchTrueFalse(NefitEntity, SwitchEntity):
-    """Class for nefit true/false entity."""
-
-    @property
-    def is_on(self):
-        """Get whether the switch is in on state."""
-        return self.coordinator.data.get(self._key) == "true"
-
-    async def async_turn_on(self, **kwargs) -> None:
-        """Turn the entity on."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "true")
-
-        _LOGGER.debug(
-            "Switch Nefit %s ON, endpoint=%s.", self._key, self.get_endpoint()
-        )
-
-    async def async_turn_off(self, **kwargs) -> None:
-        """Turn the entity off."""
-        self.coordinator.nefit.put_value(self.get_endpoint(), "false")
-
-        _LOGGER.debug(
-            "Switch Nefit %s OFF, endpoint=%s.", self._key, self.get_endpoint()
-        )
