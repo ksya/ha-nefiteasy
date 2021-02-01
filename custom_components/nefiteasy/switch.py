@@ -86,7 +86,7 @@ class NefitHotWater(NefitSwitch):
     def get_endpoint(self):
         """Get end point."""
         endpoint = (
-            "dhwOperationManualMode"
+            "dhwOperationClockMode"
             if self.coordinator.data.get("user_mode") == "clock"
             else "dhwOperationManualMode"
         )
