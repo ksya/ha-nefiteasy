@@ -19,65 +19,17 @@ Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng
 5. Click and install from there.
 
 ## Configuration
+All configuration can be done from within Home Assistant:
+1. Go to Settings
+2. Go to Integrations
+3. At the bottom right, click Add Integration
+4. Search for "Nefit" -> Nefit Easy Bosch Thermostat
+5. Fill in your serial number, access key and password
+6. Save
 
-```
-nefiteasy:
-  devices:
-  - serial: 'XXXXXXXXX'
-    accesskey: 'xxxxxxxxx'
-    password: 'xxxxxxxxx'
-    # name: Nefit Easy
-    # min_temp: 15
-    # max_temp: 27
-    # temp_step: 0.5
-    # sensors:
-    #  - list of sensors to be exposed
-    # switches:
-    #  - list of switches to be exposed
-```
-
-If any of your secrets in the configuration is numbers only, make sure to put it between quotes (`'`) to have homeassistant parse them correctly.
-
-## Examples
-### Basic
-```
-nefiteasy:
-  devices:
-  - serial: '01234567'
-    accesskey: !secret nefitaccesskey
-    password: !secret nefitpassword
-```
 
 ### Limit sensors and switches
-```
-nefiteasy:
-  devices:
-  - serial: '01234567'
-    accesskey: !secret nefitaccesskey
-    password: !secret nefitpassword
-    sensors:
-      - status
-      - supply_temperature
-      - hot_water_operation
-    switches:
-      - hot_water
-      - holiday_mode
-      - preheating
-```
-
-### Multiple devices
-```
-nefiteasy:
-  devices:
-  - serial: '01234567'
-    accesskey: !secret nefitaccesskey
-    password: !secret nefitpassword
-    name: Nefit 1
-  - serial: '76543210'
-    accesskey: !secret nefitaccesskey2
-    password: !secret nefitpassword2
-    name: Nefit 2
-```
+Just disable the enitities from UI you dont want. Those will not be updated anymore.
 
 ## Available sensors & switches
 ### Sensors
