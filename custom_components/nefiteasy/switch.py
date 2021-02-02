@@ -36,7 +36,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 async def setup_home_entrance_detection(entities, client, data, basekey, basetypeconf):
     """Home entrance detection setup."""
     for i in range(0, 10):
-        endpoint = f"/ecus/rrc/homeentrancedetection"
+        endpoint = "/ecus/rrc/homeentrancedetection"
         name = await client.async_init_presence(endpoint, i)
 
         if name is not None:

@@ -381,6 +381,7 @@ class NefitEasy(DataUpdateCoordinator):
         return self._data
 
     async def async_init_presence(self, endpoint, index):
+        """Init presence detection."""
         async with self._lock:
             url = f"{endpoint}/userprofile{index}/active"
             await self._async_get_url(url)
