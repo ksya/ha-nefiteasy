@@ -49,8 +49,8 @@ class NefitEntity(CoordinatorEntity):
 
     async def async_added_to_hass(self):
         """Add required data to coordinator."""
-        await super().async_added_to_hass()
         await self.coordinator.add_key(self._key, self._typeconf)
+        await super().async_added_to_hass()
 
     def get_endpoint(self):
         """Get end point."""

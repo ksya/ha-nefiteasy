@@ -157,6 +157,7 @@ class NefitEasy(DataUpdateCoordinator):
 
         self._data = {}  # stores device states and values
         self._event = asyncio.Event()
+        self._lock = asyncio.Lock()
         self.hass = hass
         self.connected_state = STATE_INIT
         self.expected_end = False
@@ -178,7 +179,6 @@ class NefitEasy(DataUpdateCoordinator):
 
         self._urls = {}
         self._status_keys = {}
-        self._presence_init = False
 
         update_interval = timedelta(seconds=60)
 
@@ -191,10 +191,11 @@ class NefitEasy(DataUpdateCoordinator):
 
     async def add_key(self, key, typeconf):
         """Add key to list of endpoints."""
-        if url in typeconf:
-            self._urls[typeconf[url]] = {"key": key, short: typeconf.get(short)}
-        elif short in typeconf:
-            self._status_keys[typeconf[short]] = key
+        async with self._lock:
+            if url in typeconf:
+                self._urls[typeconf[url]] = {"key": key, short: typeconf.get(short)}
+            elif short in typeconf:
+                self._status_keys[typeconf[short]] = key
 
     async def connect(self):
         """Connect to nefit easy."""
@@ -370,29 +371,27 @@ class NefitEasy(DataUpdateCoordinator):
         if self.connected_state != STATE_CONNECTION_VERIFIED:
             raise UpdateFailed("Nefit easy not connected!")
 
-        url = "/ecus/rrc/uiStatus"
-        await self._async_get_url(url)
-
-        if self._presence_init is False:
-            if "home_entrance_detection" in self._urls:
-                await self._async_init_presence()
-            self._presence_init = True
-
-        for url in self._urls:
+        async with self._lock:
+            url = "/ecus/rrc/uiStatus"
             await self._async_get_url(url)
+
+            for url in self._urls:
+                await self._async_get_url(url)
 
         return self._data
 
-    async def _async_init_presence(self):
-        for i in range(0, 10):
-            url = f"/ecus/rrc/homeentrancedetection/userprofile{i}/active"
+    async def async_init_presence(self, endpoint, index):
+        async with self._lock:
+            url = f"{endpoint}/userprofile{index}/active"
             await self._async_get_url(url)
 
-            if self._data[f"presence{i}_active"] == "on":
-                self._urls[f"/ecus/rrc/homeentrancedetection/userprofile{i}/name"] = {}
-                self._urls[
-                    f"/ecus/rrc/homeentrancedetection/userprofile{i}/detected"
-                ] = {}
+            if self._data[f"presence{index}_active"] == "on":
+                url = f"{endpoint}/userprofile{index}/name"
+                await self._async_get_url(url)
+
+                return self._data.get(f"presence{index}_name")
+
+            return None
 
     async def update_ui_status_later(self, delay):
         """Force update of uiStatus after delay."""

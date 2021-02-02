@@ -26,11 +26,27 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         elif key == "weather_dependent":
             entities.append(NefitSwitch(client, data, key, typeconf, "weather", "room"))
         elif key == "home_entrance_detection":
-            continue
+            await setup_home_entrance_detection(entities, client, data, key, typeconf)
         else:
             entities.append(NefitSwitch(client, data, key, typeconf))
 
     async_add_entities(entities, True)
+
+
+async def setup_home_entrance_detection(entities, client, data, basekey, basetypeconf):
+    """Home entrance detection setup."""
+    for i in range(0, 10):
+        endpoint = f"/ecus/rrc/homeentrancedetection"
+        name = await client.async_init_presence(endpoint, i)
+
+        if name is not None:
+            typeconf = {}
+            typeconf["name"] = basetypeconf["name"].format(name)
+            typeconf["url"] = f"{endpoint}/userprofile{i}/detected"
+            typeconf["icon"] = basetypeconf["icon"]
+            entities.append(
+                NefitSwitch(client, data, f"presence{i}_detected", typeconf)
+            )
 
 
 class NefitSwitch(NefitEntity, SwitchEntity):
