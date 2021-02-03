@@ -1,5 +1,0 @@
-nefiteasy:
-  devices:
-  - serial: !secret nefiteasy_serial
-    accesskey: !secret nefiteasy_accesskey
-    password: !secret nefiteasy_password
