@@ -30,7 +30,8 @@ SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE | SUPPORT_PRESET_MODE
 
 # supported operating modes (preset mode)
 OPERATION_MANUAL = "Manual"
-OPERATION_CLOCK = "Clock"
+OPERATION_CLOCK = "Clock 1"
+OPERATION_CLOCK2 = "Clock 2"
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -115,7 +116,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def preset_modes(self):
         """Return available preset modes."""
-        return [OPERATION_MANUAL, OPERATION_CLOCK]
+        return [OPERATION_MANUAL, OPERATION_CLOCK, OPERATION_CLOCK2]
 
     @property
     def preset_mode(self):
@@ -123,6 +124,8 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         if self.coordinator.data.get("user_mode") == "manual":
             return OPERATION_MANUAL
         if self.coordinator.data.get("user_mode") == "clock":
+            if self.coordinator.data.get("active_program") == 1:
+                return OPERATION_CLOCK2
             return OPERATION_CLOCK
 
         return OPERATION_MANUAL
@@ -159,10 +162,21 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         _LOGGER.debug("set_preset_mode called mode=%s", preset_mode)
         if preset_mode == OPERATION_CLOCK:
             new_mode = "clock"
+            program = 0
+        elif preset_mode == OPERATION_CLOCK2:
+            new_mode = "clock"
+            program = 1
         else:
             new_mode = "manual"
 
-        self.coordinator.nefit.set_usermode(new_mode)
+        if preset_mode != OPERATION_MANUAL:
+            self.coordinator.nefit.put_value('/ecus/rrc/userprogram/activeprogram', program)
+            self.coordinator.data["active_program"] = program
+
+        if new_mode != self.coordinator.data["user_mode"]:
+            self.coordinator.nefit.set_usermode(new_mode)
+            self.coordinator.data["user_mode"] = new_mode 
+            
         await asyncio.wait_for(
             self.coordinator.nefit.xmppclient.message_event.wait(), timeout=9
         )
