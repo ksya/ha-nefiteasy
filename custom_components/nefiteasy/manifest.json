@@ -1,7 +1,9 @@
 {
   "domain": "nefiteasy",
   "name": "Nefit Easy Bosch Thermostat",
+  "version": "0.0.1",
   "documentation": "https://github.com/ksya/ha-nefiteasy",
+  "issue_tracker": "https://github.com/ksya/ha-nefiteasy/issues",
   "dependencies": [],
   "codeowners": [
     "@ksya",
