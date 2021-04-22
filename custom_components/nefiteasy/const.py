@@ -35,6 +35,7 @@ SENSOR_TYPES = {
         icon: "mdi:gas-cylinder",
     },
     "status": {name: "status", url: "/system/appliance/displaycode"},
+    "cause": {name: "cause", url: "/system/appliance/causecode"},
     "supply_temperature": {
         name: "Supply temperature",
         url: "/heatingCircuits/hc1/actualSupplyTemperature",
