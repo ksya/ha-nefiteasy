@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from typing import Dict
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
@@ -52,10 +51,16 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         super().__init__(client)
 
         self._config = data
-        self._unique_id = "{}_{}".format(client.nefit.serial_number, "climate")
 
         self._unit_of_measurement = TEMP_CELSIUS
         self._hvac_modes = [HVAC_MODE_HEAT]
+
+        self._attr_unique_id = "{}_{}".format(client.nefit.serial_number, "climate")
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, self._config[CONF_SERIAL])},
+            "name": self._config[CONF_NAME],
+            "manufacturer": "Bosch",
+        }
 
     @property
     def supported_features(self):
@@ -71,11 +76,6 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     def name(self):
         """Return the name of the ClimateEntity."""
         return self._config[CONF_NAME]
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        return self._unique_id
 
     @property
     def temperature_unit(self):
@@ -144,15 +144,6 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     def max_temp(self):
         """Return the maximum temperature."""
         return self._config[CONF_MAX_TEMP]
-
-    @property
-    def device_info(self) -> Dict[str, any]:
-        """Return the device information."""
-        return {
-            "identifiers": {(DOMAIN, self._config[CONF_SERIAL])},
-            "name": self._config[CONF_NAME],
-            "manufacturer": "Bosch",
-        }
 
     async def async_set_preset_mode(self, preset_mode):
         """Set new target operation mode."""

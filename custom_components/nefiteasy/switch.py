@@ -4,6 +4,7 @@ import logging
 
 from homeassistant.components.switch import SwitchEntity
 
+from . import NefitEasy
 from .const import DOMAIN, SWITCH_TYPES
 from .nefit_entity import NefitEntity
 
@@ -52,7 +53,9 @@ async def setup_home_entrance_detection(entities, client, data, basekey, basetyp
 class NefitSwitch(NefitEntity, SwitchEntity):
     """Representation of a NefitSwitch entity."""
 
-    def __init__(self, client, data, key, typeconf, on_value="on", off_value="off"):
+    def __init__(
+        self, client: NefitEasy, data, key, typeconf, on_value="on", off_value="off"
+    ):
         """Init Nefit Switch."""
         super().__init__(client, data, key, typeconf)
 
