@@ -1,6 +1,12 @@
 """Support for Bosch home thermostats."""
+from __future__ import annotations
 
 import logging
+from typing import Any
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, SENSOR_TYPES
 from .nefit_entity import NefitEntity
@@ -8,9 +14,13 @@ from .nefit_entity import NefitEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Sensor platform setup for nefit easy."""
-    entities = []
+    entities: list[NefitEntity] = []
 
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
     data = config_entry.data
@@ -31,23 +41,23 @@ class NefitSensor(NefitEntity):
     """Representation of a NefitSensor entity."""
 
     @property
-    def state(self):
+    def state(self) -> Any:
         """Return the state/value of the sensor."""
         return self.coordinator.data.get(self._key)
 
     @property
-    def device_class(self):
+    def device_class(self) -> str | None:
         """Return the device class of the sensor."""
         if "device_class" in self._typeconf:
-            return self._typeconf["device_class"]
+            return str(self._typeconf["device_class"])
 
         return None
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> str | None:
         """Return the unit of measurement of the sensor."""
         if "unit" in self._typeconf:
-            return self._typeconf["unit"]
+            return str(self._typeconf["unit"])
 
         return None
 
@@ -56,7 +66,7 @@ class NefitYearTotal(NefitSensor):
     """Representation of the total year consumption."""
 
     @property
-    def state(self):
+    def state(self) -> str | None:
         """Return the state/value of the sensor."""
         data = self.coordinator.data.get(self._key)
 
@@ -72,12 +82,12 @@ class NefitStatus(NefitSensor):
     """Representation of the boiler status."""
 
     @property
-    def state(self):
+    def state(self) -> str:
         """Return the state/value of the sensor."""
         return get_status(self.coordinator.data.get(self._key))
 
 
-def get_status(code):
+def get_status(code: str) -> str:
     """Return status of sensor."""
     display_codes = {
         "-H": "-H: central heating active",

@@ -1,10 +1,15 @@
 """Config flow for Nefit Easy Bosch Thermostat integration."""
+from __future__ import annotations
+
 import logging
+from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.typing import ConfigType
 
 from .const import (  # pylint:disable=unused-import
     CONF_ACCESSKEY,
@@ -27,15 +32,17 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init nefity easy config flow."""
         self._serial = None
         self._accesskey = None
         self._password = None
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Step when user initializes an integration."""
-        errors = {}
+        errors: dict[str, str] = {}
         if user_input is not None:
             await self.async_set_unique_id(user_input[CONF_SERIAL])
             self._abort_if_unique_id_configured()
@@ -56,9 +63,11 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
-    async def async_step_options(self, user_input=None):
+    async def async_step_options(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Step to set options."""
-        errors = {}
+        errors: dict[str, str] = {}
         if user_input is not None:
             data = {
                 CONF_SERIAL: self._serial,
@@ -84,7 +93,7 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="options", data_schema=schema, errors=errors
         )
 
-    async def async_step_import(self, import_config=None):
+    async def async_step_import(self, import_config: ConfigType) -> FlowResult:
         """Handle the initial step."""
         await self.async_set_unique_id(import_config[CONF_SERIAL])
         self._abort_if_unique_id_configured()
