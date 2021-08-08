@@ -26,6 +26,19 @@ unit = "unit"
 device_class = "device_class"
 short = "short"
 icon = "icon"
+options = "options"
+
+SELECT_TYPES = {
+    "active_program": {
+        name: "Active program",
+        url: "/ecus/rrc/userprogram/activeprogram",
+        options: {
+            0: "Clock 1",
+            1: "Clock 2",
+        },
+        icon: "mdi:calendar-today",
+    }
+}
 
 SENSOR_TYPES = {
     "year_total": {
@@ -52,11 +65,6 @@ SENSOR_TYPES = {
         url: "/system/appliance/systemPressure",
         unit: PRESSURE_BAR,
         device_class: "pressure",
-    },
-    "active_program": {
-        name: "Active program",
-        url: "/ecus/rrc/userprogram/activeprogram",
-        icon: "mdi:calendar-today",
     },
     "hot_water_operation": {
         name: "Hot water operation",
