@@ -73,7 +73,7 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-DOMAINS = ["climate", "sensor", "switch"]
+DOMAINS = ["climate", "select", "sensor", "switch"]
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
