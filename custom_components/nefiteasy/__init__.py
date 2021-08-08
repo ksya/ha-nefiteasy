@@ -1,17 +1,19 @@
 """Support for first generation Bosch smart home thermostats: Nefit Easy, Junkers CT100 etc."""
+from __future__ import annotations
 
 import asyncio
 from datetime import timedelta
 import logging
 import re
+from typing import Any
 
 from aionefit import NefitCore
 import voluptuous as vol
 
 from homeassistant import config_entries
-
-# from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -74,7 +76,7 @@ CONFIG_SCHEMA = vol.Schema(
 DOMAINS = ["climate", "sensor", "switch"]
 
 
-async def async_setup(hass, config):
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the nefiteasy component."""
     if DOMAIN not in config:
         return True
@@ -96,7 +98,7 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry: config_entries.ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the nefiteasy component."""
     hass.data.setdefault(DOMAIN, {})
 
@@ -127,7 +129,7 @@ async def async_setup_entry(hass, entry: config_entries.ConfigEntry):
     return True
 
 
-async def async_unload_entry(hass, entry: config_entries.ConfigEntry):
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload nefit easy component."""
     if not all(
         await asyncio.gather(
@@ -151,11 +153,11 @@ async def async_unload_entry(hass, entry: config_entries.ConfigEntry):
 class NefitEasy(DataUpdateCoordinator):
     """Supporting class for nefit easy."""
 
-    def __init__(self, hass, config):
+    def __init__(self, hass: HomeAssistant, config: dict[str, Any]) -> None:
         """Initialize nefit easy component."""
         _LOGGER.debug("Initialize Nefit class")
 
-        self._data = {}  # stores device states and values
+        self._data: dict[str, Any] = {}  # stores device states and values
         self._event = asyncio.Event()
         self._lock = asyncio.Lock()
         self.hass = hass
@@ -164,7 +166,7 @@ class NefitEasy(DataUpdateCoordinator):
         self.is_connecting = False
         self.serial = config[CONF_SERIAL]
         self._config = config
-        self._request = None
+        self._request: str = ""
 
         self.nefit = NefitCore(
             serial_number=config[CONF_SERIAL],
@@ -177,8 +179,8 @@ class NefitEasy(DataUpdateCoordinator):
         self.nefit.no_content_callback = self.no_content_callback
         self.nefit.session_end_callback = self.session_end_callback
 
-        self._urls = {}
-        self._status_keys = {}
+        self._urls: dict[str, Any] = {}
+        self._status_keys: dict[str, Any] = {}
 
         update_interval = timedelta(seconds=60)
 
@@ -189,7 +191,7 @@ class NefitEasy(DataUpdateCoordinator):
             update_interval=update_interval,
         )
 
-    async def add_key(self, key, typeconf):
+    async def add_key(self, key: str, typeconf: dict[str, Any]) -> None:
         """Add key to list of endpoints."""
         async with self._lock:
             if url in typeconf:
@@ -197,7 +199,7 @@ class NefitEasy(DataUpdateCoordinator):
             elif short in typeconf:
                 self._status_keys[typeconf[short]] = key
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Connect to nefit easy."""
         _LOGGER.debug("Starting connecting..")
         if not self.is_connecting:
@@ -279,17 +281,17 @@ class NefitEasy(DataUpdateCoordinator):
         else:
             _LOGGER.debug("Connection procedure was already running..")
 
-    async def shutdown(self, event):
+    async def shutdown(self, event: str) -> None:
         """Shutdown."""
         _LOGGER.debug("Shutdown connection to Bosch cloud")
         self.expected_end = True
         await self.nefit.disconnect()
 
-    async def no_content_callback(self, data):
+    async def no_content_callback(self, data: Any) -> None:
         """Log no content."""
         _LOGGER.debug("no_content_callback: %s", data)
 
-    async def failed_auth_handler(self, event):
+    async def failed_auth_handler(self, event: str) -> None:
         """Handle failed auth."""
         self.connected_state = STATE_ERROR_AUTH
         self.nefit.xmppclient.connected_event.set()
@@ -310,7 +312,7 @@ class NefitEasy(DataUpdateCoordinator):
                 notification_id="nefit_logon_error",
             )
 
-    async def session_end_callback(self):
+    async def session_end_callback(self) -> None:
         """If connection is closed unexpectedly, try to reconnect."""
         if not self.expected_end:
             self.hass.components.persistent_notification.create(
@@ -327,7 +329,7 @@ class NefitEasy(DataUpdateCoordinator):
             # Retry connection
             await self.connect()
 
-    async def parse_message(self, data):
+    async def parse_message(self, data: dict[str, Any]) -> None:
         """Message received callback function for the XMPP client."""
         if (
             data["id"] == "/ecus/rrc/uiStatus"
@@ -348,11 +350,12 @@ class NefitEasy(DataUpdateCoordinator):
             and self.connected_state == STATE_CONNECTION_VERIFIED
         ):
             m = re.search(r"(?<=userprofile)\w+", data["id"])
-            id = m.group(0)
+            if m is not None:
+                id = m.group(0)
 
-            val = data["id"].rsplit("/", 1)[-1]
+                val = data["id"].rsplit("/", 1)[-1]
 
-            self._data[f"presence{id}_{val}"] = data["value"]
+                self._data[f"presence{id}_{val}"] = data["value"]
         elif (
             data["id"] in self._urls
             and self.connected_state == STATE_CONNECTION_VERIFIED
@@ -366,7 +369,7 @@ class NefitEasy(DataUpdateCoordinator):
         else:
             self.async_set_updated_data(self._data)
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library."""
         if self.connected_state != STATE_CONNECTION_VERIFIED:
             raise UpdateFailed("Nefit easy not connected!")
@@ -380,7 +383,7 @@ class NefitEasy(DataUpdateCoordinator):
 
         return self._data
 
-    async def async_init_presence(self, endpoint, index):
+    async def async_init_presence(self, endpoint: str, index: int) -> Any:
         """Init presence detection."""
         async with self._lock:
             url = f"{endpoint}/userprofile{index}/active"
@@ -394,13 +397,13 @@ class NefitEasy(DataUpdateCoordinator):
 
             return None
 
-    async def update_ui_status_later(self, delay):
+    async def update_ui_status_later(self, delay: float) -> None:
         """Force update of uiStatus after delay."""
         self.hass.loop.call_later(delay, self.nefit.get, "/ecus/rrc/uiStatus")
 
-    async def _async_get_url(self, url):
+    async def _async_get_url(self, url: str) -> None:
         self._event.clear()
         self._request = url
         self.nefit.get(url)
         await asyncio.wait_for(self._event.wait(), timeout=9)
-        self._request = None
+        self._request = ""
