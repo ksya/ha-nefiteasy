@@ -60,6 +60,12 @@ SENSOR_TYPES = {
         unit: TEMP_CELSIUS,
         device_class: "temperature",
     },
+    "room_temperature": {
+        name: "Room temperature",
+        url: "/heatingCircuits/hc1/roomtemperature",
+        unit: TEMP_CELSIUS,
+        device_class: "temperature",
+    },
     "system_pressure": {
         name: "System pressure",
         url: "/system/appliance/systemPressure",
