@@ -11,7 +11,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import NefitEasy
-from .const import DOMAIN, SWITCH_TYPES
+from .const import DOMAIN, SWITCHES
+from .models import NefitSwitchEntityDescription
 from .nefit_entity import NefitEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,18 +29,19 @@ async def async_setup_entry(
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
     data = config_entry.data
 
-    for key in SWITCH_TYPES:
-        typeconf = SWITCH_TYPES[key]
-        if key == "hot_water":
-            entities.append(NefitHotWater(client, data, key, typeconf))
-        elif key == "lockui":
-            entities.append(NefitSwitch(client, data, key, typeconf, "true", "false"))
-        elif key == "weather_dependent":
-            entities.append(NefitSwitch(client, data, key, typeconf, "weather", "room"))
-        elif key == "home_entrance_detection":
-            await setup_home_entrance_detection(entities, client, data, key, typeconf)
+    for description in SWITCHES:
+        if description.key == "hot_water":
+            entities.append(NefitHotWater(description, client, data))
+        elif description.key == "lockui":
+            entities.append(NefitSwitch(description, client, data, "true", "false"))
+        elif description.key == "weather_dependent":
+            entities.append(NefitSwitch(description, client, data, "weather", "room"))
+        elif description.key == "home_entrance_detection":
+            await setup_home_entrance_detection(
+                entities, client, data, description.key, description.name
+            )
         else:
-            entities.append(NefitSwitch(client, data, key, typeconf))
+            entities.append(NefitSwitch(description, client, data))
 
     async_add_entities(entities, True)
 
@@ -57,29 +59,30 @@ async def setup_home_entrance_detection(
         name = await client.async_init_presence(endpoint, i)
 
         if name is not None:
-            typeconf = {}
-            typeconf["name"] = basetypeconf["name"].format(name)
-            typeconf["url"] = f"{endpoint}/userprofile{i}/detected"
-            typeconf["icon"] = basetypeconf["icon"]
-            entities.append(
-                NefitSwitch(client, data, f"presence{i}_detected", typeconf)
+            description = NefitSwitchEntityDescription(
+                key=f"presence{i}_detected",
+                name=basetypeconf["name"].format(name),
+                url=f"{endpoint}/userprofile{i}/detected",
+                icon=basetypeconf["icon"],
             )
+            entities.append(NefitSwitch(description, client, data))
 
 
 class NefitSwitch(NefitEntity, SwitchEntity):
     """Representation of a NefitSwitch entity."""
 
+    entity_description: NefitSwitchEntityDescription
+
     def __init__(
         self,
+        entity_description: NefitSwitchEntityDescription,
         client: NefitEasy,
         data: MappingProxyType[str, Any],
-        key: str,
-        typeconf: Any,
         on_value: str = "on",
         off_value: str = "off",
-    ):
+    ) -> None:
         """Init Nefit Switch."""
-        super().__init__(client, data, key, typeconf)
+        super().__init__(entity_description, client, data)
 
         self._on_value = on_value
         self._off_value = off_value
@@ -87,7 +90,9 @@ class NefitSwitch(NefitEntity, SwitchEntity):
     @property
     def is_on(self) -> bool:
         """Get whether the switch is in on state."""
-        return bool(self.coordinator.data.get(self._key) == self._on_value)
+        return bool(
+            self.coordinator.data.get(self.entity_description.key) == self._on_value
+        )
 
     @property
     def assumed_state(self) -> bool:
@@ -102,7 +107,7 @@ class NefitSwitch(NefitEntity, SwitchEntity):
 
         _LOGGER.debug(
             "Switch Nefit %s to %s, endpoint=%s.",
-            self._key,
+            self.entity_description.key,
             self._on_value,
             self.get_endpoint(),
         )
@@ -115,7 +120,7 @@ class NefitSwitch(NefitEntity, SwitchEntity):
 
         _LOGGER.debug(
             "Switch Nefit %s to %s, endpoint=%s.",
-            self._key,
+            self.entity_description.key,
             self._off_value,
             self.get_endpoint(),
         )

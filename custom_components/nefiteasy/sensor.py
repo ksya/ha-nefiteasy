@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
 
-from .const import DOMAIN, SENSOR_TYPES
+from .const import DOMAIN, SENSORS
+from .models import NefitSensorEntityDescription
 from .nefit_entity import NefitEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,50 +27,42 @@ async def async_setup_entry(
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
     data = config_entry.data
 
-    for key in SENSOR_TYPES:
-        typeconf = SENSOR_TYPES[key]
-        if key == "status":
-            entities.append(NefitStatus(client, data, key, typeconf))
-        elif key == "year_total":
-            entities.append(NefitYearTotal(client, data, key, typeconf))
+    for description in SENSORS:
+        if description.key == "status":
+            entities.append(NefitStatus(description, client, data))
+        elif description.key == "year_total":
+            entities.append(NefitYearTotal(description, client, data))
         else:
-            entities.append(NefitSensor(client, data, key, typeconf))
+            entities.append(NefitSensor(description, client, data))
 
     async_add_entities(entities, True)
 
 
-class NefitSensor(NefitEntity):
+class NefitSensor(NefitEntity, SensorEntity):
     """Representation of a NefitSensor entity."""
 
+    entity_description: NefitSensorEntityDescription
+
     @property
-    def state(self) -> Any:
+    def native_value(self) -> StateType:
+        # def state(self) -> Any:
         """Return the state/value of the sensor."""
-        return self.coordinator.data.get(self._key)
+        return self.coordinator.data.get(self.entity_description.key)
 
     @property
-    def device_class(self) -> str | None:
-        """Return the device class of the sensor."""
-        if "device_class" in self._typeconf:
-            return str(self._typeconf["device_class"])
-
-        return None
-
-    @property
-    def unit_of_measurement(self) -> str | None:
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement of the sensor."""
-        if "unit" in self._typeconf:
-            return str(self._typeconf["unit"])
-
-        return None
+        return self.entity_description.unit
 
 
 class NefitYearTotal(NefitSensor):
     """Representation of the total year consumption."""
 
     @property
-    def state(self) -> str | None:
+    def native_value(self) -> StateType:
+        # def state(self) -> str | None:
         """Return the state/value of the sensor."""
-        data = self.coordinator.data.get(self._key)
+        data = self.coordinator.data.get(self.entity_description.key)
 
         if data is None:
             return None
@@ -82,9 +76,10 @@ class NefitStatus(NefitSensor):
     """Representation of the boiler status."""
 
     @property
-    def state(self) -> str:
+    def native_value(self) -> StateType:
+        # def state(self) -> str:
         """Return the state/value of the sensor."""
-        return get_status(self.coordinator.data.get(self._key))
+        return get_status(self.coordinator.data.get(self.entity_description.key))
 
 
 def get_status(code: str) -> str:
