@@ -8,94 +8,30 @@ import re
 from typing import Any
 
 from aionefit import NefitCore
-import voluptuous as vol
 
-from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     CONF_ACCESSKEY,
-    CONF_DEVICES,
-    CONF_MAX_TEMP,
-    CONF_MIN_TEMP,
-    CONF_NAME,
     CONF_PASSWORD,
-    CONF_SENSORS,
     CONF_SERIAL,
-    CONF_SWITCHES,
-    CONF_TEMP_STEP,
     DOMAIN,
-    SENSOR_TYPES,
     STATE_CONNECTED,
     STATE_CONNECTION_VERIFIED,
     STATE_ERROR_AUTH,
     STATE_INIT,
-    SWITCH_TYPES,
     short,
     url,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-CONNECTION_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_SERIAL): cv.string,
-        vol.Required(CONF_ACCESSKEY): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_NAME, default="Nefit"): cv.string,
-        vol.Optional(CONF_SENSORS, default=list(SENSOR_TYPES)): vol.All(
-            cv.ensure_list, [vol.In(SENSOR_TYPES)]
-        ),
-        vol.Optional(CONF_SWITCHES, default=list(SWITCH_TYPES)): vol.All(
-            cv.ensure_list, [vol.In(SWITCH_TYPES)]
-        ),
-        vol.Optional(CONF_MIN_TEMP, default=10): cv.positive_int,
-        vol.Optional(CONF_MAX_TEMP, default=28): cv.positive_int,
-        vol.Optional(CONF_TEMP_STEP, default=0.5): cv.small_float,
-    }
-)
-
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_DEVICES): vol.All(
-                    cv.ensure_list, [CONNECTION_SCHEMA]
-                ),  # array of serial, accesskey, password
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
 
 DOMAINS = ["climate", "select", "sensor", "switch"]
-
-
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Set up the nefiteasy component."""
-    if DOMAIN not in config:
-        return True
-
-    conf = config[DOMAIN]
-
-    if CONF_DEVICES not in conf:
-        return True
-
-    for device_conf in conf[CONF_DEVICES]:
-        hass.async_create_task(
-            hass.config_entries.flow.async_init(
-                DOMAIN,
-                context={"source": config_entries.SOURCE_IMPORT},
-                data=device_conf,
-            )
-        )
-
-    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
