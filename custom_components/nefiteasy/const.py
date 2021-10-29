@@ -1,6 +1,24 @@
 """Constants for the nefiteasy component."""
+from __future__ import annotations
 
-from homeassistant.const import PRESSURE_BAR, TEMP_CELSIUS
+from homeassistant.components.sensor import (
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+)
+from homeassistant.const import (
+    DEVICE_CLASS_GAS,
+    DEVICE_CLASS_PRESSURE,
+    DEVICE_CLASS_TEMPERATURE,
+    PRESSURE_BAR,
+    TEMP_CELSIUS,
+    VOLUME_CUBIC_METERS,
+)
+
+from .models import (
+    NefitSelectEntityDescription,
+    NefitSensorEntityDescription,
+    NefitSwitchEntityDescription,
+)
 
 DOMAIN = "nefiteasy"
 
@@ -28,87 +46,118 @@ short = "short"
 icon = "icon"
 options = "options"
 
-SELECT_TYPES = {
-    "active_program": {
-        name: "Active program",
-        url: "/ecus/rrc/userprogram/activeprogram",
-        options: {
+SELECTS: tuple[NefitSelectEntityDescription, ...] = (
+    NefitSelectEntityDescription(
+        key="active_program",
+        name="Active program",
+        url="/ecus/rrc/userprogram/activeprogram",
+        icon="mdi:calendar-today",
+        options={
             0: "Clock 1",
             1: "Clock 2",
         },
-        icon: "mdi:calendar-today",
-    }
-}
+    ),
+)
 
-SENSOR_TYPES = {
-    "year_total": {
-        name: "Year total",
-        url: "/ecus/rrc/recordings/yearTotal",
-        unit: "m3",
-        icon: "mdi:gas-cylinder",
-    },
-    "status": {name: "status", url: "/system/appliance/displaycode"},
-    "supply_temperature": {
-        name: "Supply temperature",
-        url: "/heatingCircuits/hc1/actualSupplyTemperature",
-        unit: TEMP_CELSIUS,
-        device_class: "temperature",
-    },
-    "outdoor_temperature": {
-        name: "Outdoor temperature",
-        url: "/system/sensors/temperatures/outdoor_t1",
-        unit: TEMP_CELSIUS,
-        device_class: "temperature",
-    },
-    "system_pressure": {
-        name: "System pressure",
-        url: "/system/appliance/systemPressure",
-        unit: PRESSURE_BAR,
-        device_class: "pressure",
-    },
-    "hot_water_operation": {
-        name: "Hot water operation",
-        url: "/dhwCircuits/dhwA/dhwOperationType",
-    },
-}
+SENSORS: tuple[NefitSensorEntityDescription, ...] = (
+    NefitSensorEntityDescription(
+        key="year_total",
+        name="Year total",
+        url="/ecus/rrc/recordings/yearTotal",
+        unit=VOLUME_CUBIC_METERS,
+        device_class=DEVICE_CLASS_GAS,
+        state_class=STATE_CLASS_TOTAL_INCREASING,
+    ),
+    NefitSensorEntityDescription(
+        key="status", name="status", url="/system/appliance/displaycode"
+    ),
+    NefitSensorEntityDescription(
+        key="supply_temperature",
+        name="Supply temperature",
+        url="/heatingCircuits/hc1/actualSupplyTemperature",
+        unit=TEMP_CELSIUS,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    NefitSensorEntityDescription(
+        key="outdoor_temperature",
+        name="Outdoor temperature",
+        url="/system/sensors/temperatures/outdoor_t1",
+        unit=TEMP_CELSIUS,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    NefitSensorEntityDescription(
+        key="system_pressure",
+        name="System pressure",
+        url="/system/appliance/systemPressure",
+        unit=PRESSURE_BAR,
+        device_class=DEVICE_CLASS_PRESSURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    NefitSensorEntityDescription(
+        key="hot_water_operation",
+        name="Hot water operation",
+        url="/dhwCircuits/dhwA/dhwOperationType",
+    ),
+)
 
-
-SWITCH_TYPES = {
-    "hot_water": {name: "Hot water", short: "DHW", icon: "mdi:water-boiler"},
-    "holiday_mode": {
-        name: "Holiday mode",
-        url: "/heatingCircuits/hc1/holidayMode/status",
-        short: "HMD",
-        icon: "mdi:briefcase-outline",
-    },
-    "fireplace_mode": {
-        name: "Fireplace mode",
-        url: "/ecus/rrc/userprogram/fireplacefunction",
-        short: "FPA",
-        icon: "mdi:fire",
-    },
-    "today_as_sunday": {
-        name: "Today as Sunday",
-        url: "/ecus/rrc/dayassunday/day10/active",
-        short: "DAS",
-        icon: "mdi:calendar-star",
-    },
-    "tomorrow_as_sunday": {
-        name: "Tomorrow as Sunday",
-        url: "/ecus/rrc/dayassunday/day11/active",
-        short: "TAS",
-        icon: "mdi:calendar-star",
-    },
-    "preheating": {
-        name: "Preheating",
-        url: "/ecus/rrc/userprogram/preheating",
-        icon: "mdi:calendar-clock",
-    },
-    "home_entrance_detection": {name: "Presence {}", icon: "mdi:account-check"},
-    "weather_dependent": {
-        name: "Weather dependent",
-        url: "/heatingCircuits/hc1/control",
-        icon: "mdi:weather-partly-snowy-rainy",
-    },
-    "lockui": {name: "Lock UI", url: "/ecus/rrc/lockuserinterface", icon: "mdi:lock"},
-}
+SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
+    NefitSwitchEntityDescription(
+        key="hot_water",
+        name="Hot water",
+        short="DHW",
+        icon="mdi:water-boiler",
+    ),
+    NefitSwitchEntityDescription(
+        key="holiday_mode",
+        name="Holiday mode",
+        url="/heatingCircuits/hc1/holidayMode/status",
+        short="HMD",
+        icon="mdi:briefcase-outline",
+    ),
+    NefitSwitchEntityDescription(
+        key="fireplace_mode",
+        name="Fireplace mode",
+        url="/ecus/rrc/userprogram/fireplacefunction",
+        short="FPA",
+        icon="mdi:fire",
+    ),
+    NefitSwitchEntityDescription(
+        key="today_as_sunday",
+        name="Today as Sunday",
+        url="/ecus/rrc/dayassunday/day10/active",
+        short="DAS",
+        icon="mdi:calendar-star",
+    ),
+    NefitSwitchEntityDescription(
+        key="tomorrow_as_sunday",
+        name="Tomorrow as Sunday",
+        url="/ecus/rrc/dayassunday/day11/active",
+        short="TAS",
+        icon="mdi:calendar-star",
+    ),
+    NefitSwitchEntityDescription(
+        key="preheating",
+        name="Preheating",
+        url="/ecus/rrc/userprogram/preheating",
+        icon="mdi:calendar-clock",
+    ),
+    NefitSwitchEntityDescription(
+        key="home_entrance_detection",
+        name="Presence {}",
+        icon="mdi:account-check",
+    ),
+    NefitSwitchEntityDescription(
+        key="weather_dependent",
+        name="Weather dependent",
+        url="/heatingCircuits/hc1/control",
+        icon="mdi:weather-partly-snowy-rainy",
+    ),
+    NefitSwitchEntityDescription(
+        key="lockui",
+        name="Lock UI",
+        url="/ecus/rrc/lockuserinterface",
+        icon="mdi:lock",
+    ),
+)

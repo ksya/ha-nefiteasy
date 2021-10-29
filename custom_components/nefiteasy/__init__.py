@@ -25,8 +25,8 @@ from .const import (
     STATE_ERROR_AUTH,
     STATE_INIT,
     short,
-    url,
 )
+from .models import NefitEntityDescription
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -127,13 +127,16 @@ class NefitEasy(DataUpdateCoordinator):
             update_interval=update_interval,
         )
 
-    async def add_key(self, key: str, typeconf: dict[str, Any]) -> None:
+    async def add_key(self, entity_description: NefitEntityDescription) -> None:
         """Add key to list of endpoints."""
         async with self._lock:
-            if url in typeconf:
-                self._urls[typeconf[url]] = {"key": key, short: typeconf.get(short)}
-            elif short in typeconf:
-                self._status_keys[typeconf[short]] = key
+            if entity_description.url is not None:
+                self._urls[entity_description.url] = {
+                    "key": entity_description.key,
+                    short: entity_description.short,
+                }
+            elif entity_description.short is not None:
+                self._status_keys[entity_description.short] = entity_description.key
 
     async def connect(self) -> None:
         """Connect to nefit easy."""
@@ -311,11 +314,11 @@ class NefitEasy(DataUpdateCoordinator):
             raise UpdateFailed("Nefit easy not connected!")
 
         async with self._lock:
-            url = "/ecus/rrc/uiStatus"
-            await self._async_get_url(url)
+            _url = "/ecus/rrc/uiStatus"
+            await self._async_get_url(_url)
 
             for url in self._urls:
-                await self._async_get_url(url)
+                await self._async_get_url(_url)
 
         return self._data
 
