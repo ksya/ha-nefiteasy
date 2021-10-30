@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from homeassistant.components.number import NumberEntityDescription
 from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.switch import SwitchEntityDescription
@@ -34,3 +35,12 @@ class NefitSelectEntityDescription(NefitEntityDescription, SelectEntityDescripti
 @dataclass
 class NefitSensorEntityDescription(NefitEntityDescription, SensorEntityDescription):
     """Represents a nefiteasy Sensor."""
+
+
+@dataclass
+class NefitNumberEntityDescription(NefitEntityDescription, NumberEntityDescription):
+    """Represents a nefiteasy Number."""
+
+    min_value: float | None = None
+    max_value: float | None = None
+    step: float | None = None
