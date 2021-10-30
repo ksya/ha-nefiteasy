@@ -317,7 +317,7 @@ class NefitEasy(DataUpdateCoordinator):
             _url = "/ecus/rrc/uiStatus"
             await self._async_get_url(_url)
 
-            for url in self._urls:
+            for _url in self._urls:
                 await self._async_get_url(_url)
 
         return self._data
