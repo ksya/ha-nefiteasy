@@ -77,7 +77,6 @@ class NefitStatus(NefitSensor):
 
     @property
     def native_value(self) -> StateType:
-        # def state(self) -> str:
         """Return the state/value of the sensor."""
         return get_status(self.coordinator.data.get(self.entity_description.key))
 

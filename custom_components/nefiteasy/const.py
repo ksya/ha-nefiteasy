@@ -15,6 +15,7 @@ from homeassistant.const import (
 )
 
 from .models import (
+    NefitNumberEntityDescription,
     NefitSelectEntityDescription,
     NefitSensorEntityDescription,
     NefitSwitchEntityDescription,
@@ -159,5 +160,23 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         name="Lock UI",
         url="/ecus/rrc/lockuserinterface",
         icon="mdi:lock",
+    ),
+    NefitSwitchEntityDescription(
+        key="shower_timer",
+        name="Shower timer",
+        url="/dhwCircuits/dhwA/extraDhw/status",
+        icon="mdi:timer-cog-outline",
+    ),
+)
+
+NUMBERS: tuple[NefitNumberEntityDescription, ...] = (
+    NefitNumberEntityDescription(
+        key="shower_timer_duration",
+        name="Shower timer duration",
+        url="/dhwCircuits/dhwA/extraDhw/duration",
+        icon="mdi:timer-outline",
+        min_value=0,
+        max_value=60,
+        step=1,
     ),
 )

@@ -31,7 +31,7 @@ from .models import NefitEntityDescription
 _LOGGER = logging.getLogger(__name__)
 
 
-DOMAINS = ["climate", "select", "sensor", "switch"]
+DOMAINS = ["climate", "select", "sensor", "switch", "number"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
