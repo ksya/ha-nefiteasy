@@ -27,9 +27,10 @@ All configuration can be done from within Home Assistant:
 5. Fill in your serial number, access key and password
 6. Save
 
+> Make sure to enter serial number and access key without spaces!
 
 ### Limit sensors and switches
-Just disable the enitities from UI you dont want. Those will not be updated anymore.
+Some entities are disabled by default, if needed they can be enabled. Entities that are disabled will not be updated.
 
 ## Available sensors & switches
 ### Sensors
@@ -41,9 +42,10 @@ Just disable the enitities from UI you dont want. Those will not be updated anym
 - system_pressure
 - active_program
 - hot_water_operation
+- inhouse_temperature
 ```
 
-### Switches
+### Controls
 ```
 - hot_water
 - holiday_mode
@@ -54,6 +56,9 @@ Just disable the enitities from UI you dont want. Those will not be updated anym
 - home_entrance_detection
 - weather_dependent
 - lockui
+- active_program
+- shower_timer
+- shower_timer_duration
 ```
 
 ## Debugging problems
