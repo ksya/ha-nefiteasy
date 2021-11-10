@@ -57,6 +57,7 @@ SELECTS: tuple[NefitSelectEntityDescription, ...] = (
             0: "Clock 1",
             1: "Clock 2",
         },
+        entity_registry_enabled_default=False,
     ),
 )
 
@@ -100,6 +101,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         key="hot_water_operation",
         name="Hot water operation",
         url="/dhwCircuits/dhwA/dhwOperationType",
+        entity_registry_enabled_default=False,
     ),
 )
 
@@ -109,6 +111,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         name="Hot water",
         short="DHW",
         icon="mdi:water-boiler",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="holiday_mode",
@@ -116,6 +119,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         url="/heatingCircuits/hc1/holidayMode/status",
         short="HMD",
         icon="mdi:briefcase-outline",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="fireplace_mode",
@@ -123,6 +127,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         url="/ecus/rrc/userprogram/fireplacefunction",
         short="FPA",
         icon="mdi:fire",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="today_as_sunday",
@@ -130,6 +135,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         url="/ecus/rrc/dayassunday/day10/active",
         short="DAS",
         icon="mdi:calendar-star",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="tomorrow_as_sunday",
@@ -137,35 +143,41 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
         url="/ecus/rrc/dayassunday/day11/active",
         short="TAS",
         icon="mdi:calendar-star",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="preheating",
         name="Preheating",
         url="/ecus/rrc/userprogram/preheating",
         icon="mdi:calendar-clock",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="home_entrance_detection",
         name="Presence {}",
         icon="mdi:account-check",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="weather_dependent",
         name="Weather dependent",
         url="/heatingCircuits/hc1/control",
         icon="mdi:weather-partly-snowy-rainy",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="lockui",
         name="Lock UI",
         url="/ecus/rrc/lockuserinterface",
         icon="mdi:lock",
+        entity_registry_enabled_default=False,
     ),
     NefitSwitchEntityDescription(
         key="shower_timer",
         name="Shower timer",
         url="/dhwCircuits/dhwA/extraDhw/status",
         icon="mdi:timer-cog-outline",
+        entity_registry_enabled_default=False,
     ),
 )
 
@@ -178,5 +190,6 @@ NUMBERS: tuple[NefitNumberEntityDescription, ...] = (
         min_value=0,
         max_value=60,
         step=1,
+        entity_registry_enabled_default=False,
     ),
 )
