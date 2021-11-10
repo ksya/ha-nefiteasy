@@ -103,6 +103,15 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/dhwCircuits/dhwA/dhwOperationType",
         entity_registry_enabled_default=False,
     ),
+    NefitSensorEntityDescription(
+        key="inhouse_temperature",
+        name="Inhouse temperature",
+        short="IHT",
+        unit=TEMP_CELSIUS,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        entity_registry_enabled_default=False,
+    ),
 )
 
 SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
