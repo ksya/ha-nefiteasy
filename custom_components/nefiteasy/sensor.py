@@ -1,9 +1,10 @@
 """Support for Bosch home thermostats."""
 from __future__ import annotations
 
+from contextlib import suppress
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -47,7 +48,15 @@ class NefitSensor(NefitEntity, SensorEntity):
     def native_value(self) -> StateType:
         # def state(self) -> Any:
         """Return the state/value of the sensor."""
-        return self.coordinator.data.get(self.entity_description.key)
+        value = self.coordinator.data.get(self.entity_description.key)
+        if value is None:
+            return value
+
+        with suppress(TypeError):
+            if self.device_class == SensorDeviceClass.TEMPERATURE:
+                return round(float(value), 1)
+
+        return value
 
     @property
     def native_unit_of_measurement(self) -> str | None:
