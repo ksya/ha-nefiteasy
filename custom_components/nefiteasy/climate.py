@@ -140,8 +140,8 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         return OPERATION_MANUAL
 
     @property
-    def device_state_attributes(self) -> dict[str, Any]:
-        """Return the device specific state attributes."""
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the nefit specific state attributes."""
         return {
             "last_update": self.coordinator.data.get("last_update"),
             "boiler_indicator": self.coordinator.data.get("boiler_indicator"),
