@@ -4,15 +4,9 @@ from __future__ import annotations
 from homeassistant.components.sensor import (
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
+    SensorDeviceClass,
 )
-from homeassistant.const import (
-    DEVICE_CLASS_GAS,
-    DEVICE_CLASS_PRESSURE,
-    DEVICE_CLASS_TEMPERATURE,
-    PRESSURE_BAR,
-    TEMP_CELSIUS,
-    VOLUME_CUBIC_METERS,
-)
+from homeassistant.const import PRESSURE_BAR, TEMP_CELSIUS, VOLUME_CUBIC_METERS
 
 from .models import (
     NefitNumberEntityDescription,
@@ -67,7 +61,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         name="Year total",
         url="/ecus/rrc/recordings/yearTotal",
         unit=VOLUME_CUBIC_METERS,
-        device_class=DEVICE_CLASS_GAS,
+        device_class=SensorDeviceClass.GAS,
         state_class=STATE_CLASS_TOTAL_INCREASING,
     ),
     NefitSensorEntityDescription(
@@ -78,7 +72,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         name="Supply temperature",
         url="/heatingCircuits/hc1/actualSupplyTemperature",
         unit=TEMP_CELSIUS,
-        device_class=DEVICE_CLASS_TEMPERATURE,
+        device_class=SensorDeviceClass.TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     NefitSensorEntityDescription(
@@ -86,7 +80,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         name="Outdoor temperature",
         url="/system/sensors/temperatures/outdoor_t1",
         unit=TEMP_CELSIUS,
-        device_class=DEVICE_CLASS_TEMPERATURE,
+        device_class=SensorDeviceClass.TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     NefitSensorEntityDescription(
@@ -94,7 +88,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         name="System pressure",
         url="/system/appliance/systemPressure",
         unit=PRESSURE_BAR,
-        device_class=DEVICE_CLASS_PRESSURE,
+        device_class=SensorDeviceClass.PRESSURE,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     NefitSensorEntityDescription(
@@ -108,7 +102,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         name="Inhouse temperature",
         short="IHT",
         unit=TEMP_CELSIUS,
-        device_class=DEVICE_CLASS_TEMPERATURE,
+        device_class=SensorDeviceClass.TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
         entity_registry_enabled_default=False,
     ),
