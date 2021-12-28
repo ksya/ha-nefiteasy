@@ -38,7 +38,12 @@ async def async_setup_entry(
             entities.append(NefitSwitch(description, client, data, "weather", "room"))
         elif description.key == "home_entrance_detection":
             await setup_home_entrance_detection(
-                entities, client, data, description.key, description.name
+                entities,
+                client,
+                data,
+                description.key,
+                description.name,
+                description.icon,
             )
         else:
             entities.append(NefitSwitch(description, client, data))
@@ -51,7 +56,8 @@ async def setup_home_entrance_detection(
     client: NefitEasy,
     data: MappingProxyType[str, Any],
     basekey: str,
-    basetypeconf: Any,
+    basename: str,
+    baseicon: str,
 ) -> None:
     """Home entrance detection setup."""
     for i in range(0, 10):
@@ -61,9 +67,9 @@ async def setup_home_entrance_detection(
         if name is not None:
             description = NefitSwitchEntityDescription(
                 key=f"presence{i}_detected",
-                name=basetypeconf["name"].format(name),
+                name=basename.format(name),
                 url=f"{endpoint}/userprofile{i}/detected",
-                icon=basetypeconf["icon"],
+                icon=baseicon,
             )
             entities.append(NefitSwitch(description, client, data))
 
