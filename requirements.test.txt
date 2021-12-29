@@ -1,0 +1,4 @@
+aionefit==0.14
+pytest
+pytest-cov==2.9.0
+pytest-homeassistant-custom-component
