@@ -8,8 +8,12 @@ import pytest
 #from custom_components.nefiteasy.const import SWITCHES
 from homeassistant.helpers import entity_registry as er
 
-from tests.common import MockConfigEntry, load_fixture
 
+# This fixture enables loading custom integrations in all tests.
+# Remove to enable selective use of this fixture
+@pytest.fixture(autouse=True)
+def auto_enable_custom_integrations(enable_custom_integrations):
+    yield
 
 #@pytest.fixture
 #async def nefit_switch_wrapper(nefit_config, hass):
