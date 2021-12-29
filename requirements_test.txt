@@ -1,0 +1,4 @@
+aionefit==0.14
+pytest
+pytest-cov
+pytest-homeassistant-custom-component==0.5.10
