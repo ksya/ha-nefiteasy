@@ -4,8 +4,8 @@ from unittest.mock import patch
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 
-from tests.common import MockConfigEntry
-from tests.components.nefiteasy.conftest import ClientMock
+from from pytest_homeassistant_custom_component.common import import MockConfigEntry, load_fixture import MockConfigEntry
+from .conftest import ClientMock
 
 
 @patch("homeassistant.components.nefiteasy.NefitCore")
