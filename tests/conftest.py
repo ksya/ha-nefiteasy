@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from homeassistant.components.nefiteasy.const import SWITCHES
+from homeassistant.custom_components.nefiteasy.const import SWITCHES
 from homeassistant.helpers import entity_registry as er
 
 from tests.common import MockConfigEntry, load_fixture
