@@ -18,7 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Set PY env
-        run: echo "::set-env name=PY::$(python -VV | sha256sum | cut -d' ' -f1)"
+        run: echo "$(python -VV | sha256sum | cut -d' ' -f1) >> $PY"
 
       - name: Install dependencies
         run: |
