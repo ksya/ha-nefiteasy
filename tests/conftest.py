@@ -90,7 +90,7 @@ async def nefit_number_wrapper(nefit_config, hass):
 
 
 @pytest.fixture
-@patch("homeassistant.components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.NefitCore")
 async def nefit_wrapper(nefit_mock, hass, nefit_config):
     """Setups a nefiteasy wrapper with mocked device."""
     config_entry = nefit_config
@@ -105,7 +105,7 @@ async def nefit_wrapper(nefit_mock, hass, nefit_config):
 
 
 @pytest.fixture
-@patch("homeassistant.components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.NefitCore")
 async def nefit_wrapper_precense(nefit_mock, hass, nefit_config):
     """Setups a nefiteasy wrapper with mocked device."""
     config_entry = nefit_config
