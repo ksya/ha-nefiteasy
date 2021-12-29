@@ -1,0 +1,249 @@
+{
+    "/heatingCircuits/hc1/holidayMode/status": {
+        "id": "/heatingCircuits/hc1/holidayMode/status",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/userprogram/fireplacefunction": {
+        "id": "/ecus/rrc/userprogram/fireplacefunction",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/dayassunday/day10/active": {
+        "id": "/ecus/rrc/dayassunday/day10/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/dayassunday/day11/active": {
+        "id": "/ecus/rrc/dayassunday/day11/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/userprogram/preheating": {
+        "id": "/ecus/rrc/userprogram/preheating",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "on"
+    },
+    "/heatingCircuits/hc1/control": {
+        "id": "/heatingCircuits/hc1/control",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "room"
+    },
+    "/ecus/rrc/lockuserinterface": {
+        "id": "/ecus/rrc/lockuserinterface",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "false"
+    },
+    "/dhwCircuits/dhwA/extraDhw/status": {
+        "id": "/dhwCircuits/dhwA/extraDhw/status",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/dhwCircuits/dhwA/dhwOperationType": {
+        "id": "/dhwCircuits/dhwA/dhwOperationType",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "custom"
+    },
+    "/ecus/rrc/userprogram/activeprogram": {
+        "id": "/ecus/rrc/userprogram/activeprogram",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": 0,
+        "unitOfMeasure": "",
+        "minValue": 0,
+        "maxValue": 2
+    },
+    "/system/appliance/systemPressure": {
+        "id": "/system/appliance/systemPressure",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": 1.5,
+        "unitOfMeasure": "bar",
+        "minValue": 0.0,
+        "maxValue": 25.0
+    },
+    "/system/sensors/temperatures/outdoor_t1": {
+        "id": "/system/sensors/temperatures/outdoor_t1",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": 9.0,
+        "unitOfMeasure": "C",
+        "minValue": -40.0,
+        "maxValue": 50.0,
+        "status": "ok",
+        "srcType": "virtual",
+        "timestamp": "2021-12-29T15:32:16"
+    },
+    "/heatingCircuits/hc1/actualSupplyTemperature": {
+        "id": "/heatingCircuits/hc1/actualSupplyTemperature",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": 29.1,
+        "unitOfMeasure": "C",
+        "minValue": 0,
+        "maxValue": 100.0
+    },
+    "/system/appliance/displaycode": {
+        "id": "/system/appliance/displaycode",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": "0E"
+    },
+    "/ecus/rrc/recordings/yearTotal": {
+        "id": "/ecus/rrc/recordings/yearTotal",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": 9970.3,
+        "unitOfMeasure": "kWh",
+        "minValue": 0,
+        "maxValue": 429496729.5
+    },
+    "/dhwCircuits/dhwA/extraDhw/duration": {
+        "id": "/dhwCircuits/dhwA/extraDhw/duration",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": 20,
+        "unitOfMeasure": "Min",
+        "minValue": 5,
+        "maxValue": 60},
+    "/ecus/rrc/homeentrancedetection/userprofile0/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile0/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile1/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile1/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile2/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile2/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile3/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile3/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile4/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile4/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile5/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile5/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile6/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile6/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile7/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile7/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile8/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile8/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/ecus/rrc/homeentrancedetection/userprofile9/active": {
+        "id": "/ecus/rrc/homeentrancedetection/userprofile9/active",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
+    "/gateway/brandID": {
+        "id": "/gateway/brandID",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": "0x0"
+    },
+    "/ecus/rrc/uiStatus": {
+        "id": "/ecus/rrc/uiStatus",
+        "type": "uiUpdate",
+        "recordable": 0,
+        "writeable": 0,
+        "value": {
+            "CTD": "2021-12-28T21:43:25+00:00 Tu",
+            "CTR": "room",
+            "UMD": "clock",
+            "MMT": "20.5",
+            "CPM": "auto",
+            "CSP": "15",
+            "TOR": "off",
+            "TOD": "0",
+            "TOT": "20.0",
+            "TSP": "20.0",
+            "IHT": "17.50",
+            "IHS": "ok",
+            "DAS": "off",
+            "TAS": "off",
+            "HMD": "off",
+            "ARS": "init",
+            "FPA": "off",
+            "ESI": "off",
+            "BAI": "CH",
+            "BLE": "false",
+            "BBE": "false",
+            "BMR": "false",
+            "PMR": "false",
+            "RS": "off",
+            "DHW": "on",
+            "HED_EN": "false",
+            "HED_DEV": "false",
+            "FAH": "false",
+            "DOT": "false",
+            "HED_DB": ""
+        }
+    }
+}
