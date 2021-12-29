@@ -8,7 +8,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, load_f
 from .conftest import ClientMock
 
 
-@patch("homeassistant.components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.NefitCore")
 async def test_setup_entry(mock_class, hass: HomeAssistant):
     """Validate that setup entry also configure the client."""
     client = ClientMock(mock_class)

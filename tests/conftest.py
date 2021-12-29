@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-#from custom_components.nefiteasy.const import SWITCHES
+from custom_components.nefiteasy.const import SWITCHES
 from homeassistant.helpers import entity_registry as er
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
@@ -17,26 +17,25 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, load_f
 def auto_enable_custom_integrations(enable_custom_integrations):
     yield
 
-#@pytest.fixture
-#async def nefit_switch_wrapper(nefit_config, hass):
-#    """Setups a nefiteasy switch wrapper with mocked device."""
-#    config_entry = nefit_config
-#
-#    entity_registry = er.async_get(hass)
-#
-#    for description in SWITCHES:
-#        if (
-#            description.entity_registry_enabled_default is False
-#            and description.key != "home_entrance_detection"
-#        ):
-#            entity_registry.async_get_or_create(
-#                domain="switch",
-#                platform="nefiteasy",
-#                unique_id=f"123456789_{description.key}",
-#                config_entry=config_entry,
-#                original_name=description.name,
-#            )
+@pytest.fixture
+async def nefit_switch_wrapper(nefit_config, hass):
+    """Setups a nefiteasy switch wrapper with mocked device."""
+    config_entry = nefit_config
 
+    entity_registry = er.async_get(hass)
+
+    for description in SWITCHES:
+        if (
+            description.entity_registry_enabled_default is False
+            and description.key != "home_entrance_detection"
+        ):
+            entity_registry.async_get_or_create(
+                domain="switch",
+                platform="nefiteasy",
+                unique_id=f"123456789_{description.key}",
+                config_entry=config_entry,
+                original_name=description.name,
+            )
 
 @pytest.fixture
 async def nefit_sensor_wrapper(nefit_config, hass):
@@ -177,7 +176,7 @@ class ClientMock:
 
         self.mock = mock
 
-        self.data = json.loads(load_fixture("nefiteasy/nefit_data.json"))
+        self.data = json.loads(load_fixture("nefit_data.json"))
 
     def get(self, path):
         """Get data."""
