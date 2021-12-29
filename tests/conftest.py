@@ -8,7 +8,7 @@ import pytest
 #from custom_components.nefiteasy.const import SWITCHES
 from homeassistant.helpers import entity_registry as er
 
-from from pytest_homeassistant_custom_component.common import import MockConfigEntry, load_fixture
+from pytest_homeassistant_custom_component.common import import MockConfigEntry, load_fixture
 
 
 # This fixture enables loading custom integrations in all tests.
