@@ -78,11 +78,10 @@ jobs:
           echo "::add-matcher::.github/workflows/matchers/flake8.json"
       - name: Run flake8
         run: pre-commit run --hook-stage manual flake8 --all-files
-        
-  pylint:
-    name: Check pylint
+
+  lint-other:
+    name: Check other linters
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Check out code from GitHub
         uses: actions/checkout@v2.4.0
@@ -91,13 +90,34 @@ jobs:
         id: python
         with:
           python-version: "3.x"
-      - name: Install requirements
-        run: python3 -m pip install -r requirements_test.txt
-      - name: Register pylint problem matcher
+      - name: Setup pre-commit
         run: |
-          echo "::add-matcher::.github/workflows/matchers/pylint.json"
-      - name: Run pylint
-        run: pylint custom_components
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Run pyupgrade
+        run: pre-commit run --hook-stage manual pyupgrade --all-files --show-diff-on-failure
+      - name: Register yamllint problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/yamllint.json"
+      - name: Run yamllint
+        run: pre-commit run --hook-stage manual yamllint --all-files --show-diff-on-failure
+      - name: Register check-json problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/check-json.json"
+      - name: Run check-json
+        run: pre-commit run --hook-stage manual check-json --all-files
+      - name: Register check executables problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/check-executables-have-shebangs.json"
+      - name: Run executables check
+        run: pre-commit run --hook-stage manual check-executables-have-shebangs --all-files
+      - name: Register codespell problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/codespell.json"
+      - name: Run codespell
+        run: pre-commit run --show-diff-on-failure --hook-stage manual codespell --all-files
+      - name: Run bandit
+        run: pre-commit run --hook-stage manual bandit --all-files --show-diff-on-failure     
 
   tests:
     runs-on: "ubuntu-latest"
