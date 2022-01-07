@@ -16,6 +16,7 @@ from custom_components.nefiteasy.const import SWITCHES
 def auto_enable_custom_integrations(enable_custom_integrations):
     yield
 
+
 @pytest.fixture
 async def nefit_switch_wrapper(nefit_config, hass):
     """Setups a nefiteasy switch wrapper with mocked device."""
@@ -35,6 +36,7 @@ async def nefit_switch_wrapper(nefit_config, hass):
                 config_entry=config_entry,
                 original_name=description.name,
             )
+
 
 @pytest.fixture
 async def nefit_sensor_wrapper(nefit_config, hass):
