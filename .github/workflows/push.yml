@@ -9,29 +9,31 @@ on:
 jobs:
   validate:
     runs-on: "ubuntu-latest"
-    name: Validate
+    name: Validate HACS
     steps:
-        - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v2"
 
-        - name: HACS validation
-          uses: "hacs/action@main"
-          with:
-            category: "integration"
-            ignore: topics
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+          ignore: topics
 
-        - name: Hassfest validation
-          uses: "home-assistant/actions/hassfest@master"
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
 
   style:
     runs-on: "ubuntu-latest"
     name: Check style formatting
     steps:
-        - uses: "actions/checkout@v2"
-        - uses: "actions/setup-python@v2.3.1"
-          with:
-            python-version: "3.x"
-        - run: python3 -m pip install black
-        - run: black .
+      - uses: "actions/checkout@v2"
+      - uses: "actions/setup-python@v2.3.1"
+        with:
+          python-version: "3.x"
+      - run: python3 -m pip install black
+      - run: black .
+      - run: python3 -m pip install isort
+      - run: isort .
 
   tests:
     runs-on: "ubuntu-latest"
