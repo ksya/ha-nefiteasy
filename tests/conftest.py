@@ -14,6 +14,7 @@ from custom_components.nefiteasy.const import SWITCHES
 # Remove to enable selective use of this fixture
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
+    """Switches on usage of custom integrations."""
     yield
 
 
