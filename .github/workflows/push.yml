@@ -21,19 +21,24 @@ jobs:
 
       - name: Hassfest validation
         uses: "home-assistant/actions/hassfest@master"
-
-  style:
-    runs-on: "ubuntu-latest"
-    name: Check style formatting
+        
+  lint-black:
+    name: Check black
+    runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v2"
-      - uses: "actions/setup-python@v2.3.1"
+      - name: Check out code from GitHub
+        uses: actions/checkout@v2.4.0
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v2.3.1
+        id: python
         with:
           python-version: "3.x"
-      - run: python3 -m pip install black
-      - run: black .
-      - run: python3 -m pip install isort
-      - run: isort .
+      - name: Setup pre-commit
+        run: |
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Run black
+        run: pre-commit run --hook-stage manual black --all-files --show-diff-on-failure
 
   lint-isort:
     name: Check isort
