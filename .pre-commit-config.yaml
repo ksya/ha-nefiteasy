@@ -11,7 +11,7 @@ repos:
         args:
           - --safe
           - --quiet
-        files: ^((homeassistant|script|tests)/.+)?[^/]+\.py$
+        files: ^((custom_components|tests)/.+)?[^/]+\.py$
   - repo: https://github.com/codespell-project/codespell
     rev: v2.0.0
     hooks:
