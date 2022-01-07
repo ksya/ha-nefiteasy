@@ -3,12 +3,11 @@ import asyncio
 import json
 from unittest.mock import MagicMock, patch
 
+from homeassistant.helpers import entity_registry as er
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.nefiteasy.const import SWITCHES
-from homeassistant.helpers import entity_registry as er
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 
 # This fixture enables loading custom integrations in all tests.

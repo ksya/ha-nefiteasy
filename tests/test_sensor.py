@@ -4,7 +4,6 @@ from datetime import timedelta
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util.dt import utcnow
-
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 
