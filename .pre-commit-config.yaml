@@ -42,7 +42,7 @@ repos:
         args:
           - --quiet
           - --format=custom
-          - --configfile=tests/bandit.yaml
+          - --configfile=bandit.yaml
         files: ^(homeassistant|script|tests)/.+\.py$
   - repo: https://github.com/PyCQA/isort
     rev: 5.10.0
