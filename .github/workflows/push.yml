@@ -46,14 +46,8 @@ jobs:
         id: python
         with:
           python-version: "3.x"
-      - name: Restore pre-commit environment from cache
-        id: cache-precommit
-        uses: actions/cache@v2.1.7
-        with:
-          path: ${{ env.PRE_COMMIT_CACHE }}
-          key: ${{ runner.os }}-${{ needs.prepare-base.outputs.pre-commit-key }}
       - name: Setup pre-commit
-      - run: |
+        run: |
           python3 -m pip install pre-commit
           pre-commit install
       - name: Run isort
