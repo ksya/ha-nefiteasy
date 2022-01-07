@@ -91,6 +91,8 @@ jobs:
         id: python
         with:
           python-version: "3.x"
+      - name: Install requirements
+        run: python3 -m pip install -r requirements_test.txt
       - name: Register pylint problem matcher
         run: |
           echo "::add-matcher::.github/workflows/matchers/pylint.json"
