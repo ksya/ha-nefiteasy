@@ -1,5 +1,6 @@
 name: Pull actions
 
+# yamllint disable-line rule:truthy
 on:
   pull_request:
 
@@ -31,7 +32,7 @@ jobs:
       - run: black .
       - run: python3 -m pip install isort
       - run: isort .
-      
+
   lint-isort:
     name: Check isort
     runs-on: ubuntu-latest
