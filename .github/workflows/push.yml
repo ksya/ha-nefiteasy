@@ -94,7 +94,8 @@ jobs:
       - name: Register pylint problem matcher
         run: |
           echo "::add-matcher::.github/workflows/matchers/pylint.json"
-      - name: pylint custom_components
+      - name: Run pylint
+        run: pylint custom_components
 
   tests:
     runs-on: "ubuntu-latest"
