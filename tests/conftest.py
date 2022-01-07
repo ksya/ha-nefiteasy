@@ -3,19 +3,20 @@ import asyncio
 import json
 from unittest.mock import MagicMock, patch
 
+from homeassistant.helpers import entity_registry as er
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.nefiteasy.const import SWITCHES
-from homeassistant.helpers import entity_registry as er
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 
 # This fixture enables loading custom integrations in all tests.
 # Remove to enable selective use of this fixture
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
+    """Switches on usage of custom integrations."""
     yield
+
 
 @pytest.fixture
 async def nefit_switch_wrapper(nefit_config, hass):
@@ -36,6 +37,7 @@ async def nefit_switch_wrapper(nefit_config, hass):
                 config_entry=config_entry,
                 original_name=description.name,
             )
+
 
 @pytest.fixture
 async def nefit_sensor_wrapper(nefit_config, hass):
