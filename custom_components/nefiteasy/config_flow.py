@@ -47,8 +47,6 @@ class NefitConnection:
 
     async def failed_auth_handler(self, event: str) -> None:
         """Report failed auth."""
-        self.nefit.xmppclient.connected_event.set()
-
         if event == "auth_error_password":
             self.auth_failure = AUTH_ERROR_PASSWORD
             _LOGGER.debug("Invalid password for connecting to Bosch cloud.")
@@ -57,6 +55,8 @@ class NefitConnection:
             _LOGGER.debug(
                 "Invalid credentials (serial or accesskey) for connecting to Bosch cloud."
             )
+
+        self.nefit.xmppclient.connected_event.set()
 
     async def session_end_callback(self) -> None:
         """Session end."""
@@ -85,7 +85,7 @@ class NefitConnection:
                 self.nefit.xmppclient.message_event.wait(), timeout=10.0
             )
         except asyncio.TimeoutError as ex:
-            self.nefit.xmppclient.cancel_connection_attempt()
+            await self.nefit.disconnect()
             raise CannotCommunicate from ex
 
         self.nefit.xmppclient.message_event.clear()

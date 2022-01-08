@@ -180,12 +180,15 @@ class ClientMock:
 
         self.data = json.loads(load_fixture("nefit_data.json"))
 
+        self.failed_auth_handler = None
+
     def get(self, path):
         """Get data."""
         if path in self.data:
             loop = asyncio.get_event_loop()
-            coroutine = self.callback(self.data[path])
-            loop.create_task(coroutine)
+            if self.callback is not None:
+                coroutine = self.callback(self.data[path])
+                loop.create_task(coroutine)
 
         self.xmppclient.message_event.set()
 
@@ -194,7 +197,7 @@ class ClientMock:
         self.xmppclient.connected_event.set()
 
         self.serial_number = self.mock.call_args_list[0][1]["serial_number"]
-        self.callback = self.mock.call_args_list[0][1]["message_callback"]
+        self.callback = self.mock.call_args_list[0][1].get("message_callback")
 
         return
 
