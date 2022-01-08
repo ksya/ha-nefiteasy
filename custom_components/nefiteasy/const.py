@@ -33,6 +33,9 @@ STATE_CONNECTION_VERIFIED = "connection_verified"
 STATE_INIT = "initializing"
 STATE_ERROR_AUTH = "authentication_failed"
 
+AUTH_ERROR_PASSWORD = "auth_error_password"
+AUTH_ERROR_CREDENTIALS = "auth_error_credentials"
+
 name = "name"
 url = "url"
 unit = "unit"
