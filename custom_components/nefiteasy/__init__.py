@@ -43,14 +43,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     client = NefitEasy(hass, credentials)
 
     await client.connect()
-    _LOGGER.debug("Is connected state? %s", client.connected_state)
-
     if client.connected_state == STATE_CONNECTION_VERIFIED:
         hass.data[DOMAIN][entry.entry_id]["client"] = client
-        _LOGGER.info(
-            "Successfully connected %s to Nefit device!",
-            credentials.get(CONF_SERIAL),
-        )
     else:
         raise ConfigEntryNotReady
 
@@ -139,85 +133,49 @@ class NefitEasy(DataUpdateCoordinator):
 
     async def connect(self) -> None:
         """Connect to nefit easy."""
-        _LOGGER.debug("Starting connecting..")
+        _LOGGER.debug("Start connecting.")
         if not self.is_connecting:
             self.is_connecting = True
-            retries_connection = 0
 
-            while self.connected_state != STATE_CONNECTED and retries_connection < 3:
-                await self.nefit.connect()
-                _LOGGER.debug("Waiting for connected event")
+            await self.nefit.connect()
+            _LOGGER.debug("Waiting for connected event.")
+            try:
+                await asyncio.wait_for(
+                    self.nefit.xmppclient.connected_event.wait(), timeout=29.0
+                )
+            except asyncio.TimeoutError:
+                _LOGGER.debug("TimeoutError on waiting for connected event.")
+            except:  # noqa: E722 pylint: disable=bare-except
+                _LOGGER.debug("Unknown error.")
+            else:
+                _LOGGER.debug("Connected successfully.")
+                self.connected_state = STATE_CONNECTED
+
+            if self.connected_state == STATE_CONNECTED:
+                self.nefit.get("/gateway/brandID")
                 try:
                     await asyncio.wait_for(
-                        self.nefit.xmppclient.connected_event.wait(), timeout=29.0
-                    )
-                    self.connected_state = STATE_CONNECTED
-                    _LOGGER.debug("adding stop listener")
-                    self.hass.bus.async_listen_once(
-                        EVENT_HOMEASSISTANT_STOP, self.shutdown
+                        self.nefit.xmppclient.message_event.wait(), timeout=29.0
                     )
                 except asyncio.TimeoutError:
                     _LOGGER.debug(
-                        "TimeoutError on waiting for connected event (connection retries=%d)",
-                        retries_connection,
+                        "Did not get a response in time for testing connection."
                     )
-                    retries_connection = retries_connection + 1
                 except:  # noqa: E722 pylint: disable=bare-except
-                    _LOGGER.debug("Unknown error")
+                    _LOGGER.debug("No connection while testing connection.")
+                else:
+                    self.nefit.xmppclient.message_event.clear()
 
-            # test password for decrypting messages if connected
-            if self.connected_state == STATE_CONNECTED:
-                _LOGGER.info(
-                    "Testing connection (connect retries=%d)", retries_connection
-                )
-                retries_validation = 0
-                while (
-                    self.connected_state != STATE_CONNECTION_VERIFIED
-                    and retries_validation < 3
-                ):
-                    try:
-                        self.nefit.get("/gateway/brandID")
-                        await asyncio.wait_for(
-                            self.nefit.xmppclient.message_event.wait(), timeout=29.0
-                        )
-                        self.nefit.xmppclient.message_event.clear()
-
-                        if self.connected_state == STATE_ERROR_AUTH:
-                            self.is_connecting = False
-                            return
-
+                    # No exception and no auth error
+                    if self.connected_state == STATE_CONNECTED:
                         self.connected_state = STATE_CONNECTION_VERIFIED
-                        _LOGGER.info(
-                            "Connected %s with %d retries and %d test retries.",
-                            self.serial,
-                            retries_connection,
-                            retries_validation,
-                        )
-                    except asyncio.TimeoutError:
-                        _LOGGER.error(
-                            "Did not get a response in time for testing connection (validation retries=%d).",
-                            retries_validation,
-                        )
-                        retries_validation = retries_validation + 1
-                    except:  # noqa: E722 pylint: disable=bare-except
-                        _LOGGER.error("No connection while testing connection.")
-                        break
 
             if self.connected_state != STATE_CONNECTION_VERIFIED:
-                self.hass.components.persistent_notification.create(
-                    f"Did not succeed in connecting {self.serial} to Bosch cloud after retrying 3 times. Retry in 30 seconds.",
-                    title="Nefit connect error",
-                    notification_id="nefit_connect_error",
-                )
-                self.is_connecting = False
-
-                # wait 30 seconds to retry
-                await asyncio.sleep(30)
-                await self.connect()
+                _LOGGER.debug("Successfully verified connection.")
 
             self.is_connecting = False
         else:
-            _LOGGER.debug("Connection procedure was already running..")
+            _LOGGER.debug("Connection procedure is already running.")
 
     async def shutdown(self, event: str) -> None:
         """Shutdown."""
@@ -250,22 +208,19 @@ class NefitEasy(DataUpdateCoordinator):
                 notification_id="nefit_logon_error",
             )
 
+        if self.config_entry:
+            self.config_entry.async_start_reauth(self.hass)
+
     async def session_end_callback(self) -> None:
         """If connection is closed unexpectedly, try to reconnect."""
         if not self.expected_end:
-            self.hass.components.persistent_notification.create(
-                f"Unexpected disconnect of {self.serial} with Bosch server. Try to reconnect..",
-                title="Nefit disconnect",
-                notification_id="nefit_disconnect",
+            _LOGGER.debug(
+                f"Unexpected disconnect of {self.serial} with Bosch server. Try to reconnect.."
             )
 
-            _LOGGER.info("Starting reconnect procedure.")
             # Reset values
             self.connected_state = STATE_INIT
             self.expected_end = False
-
-            # Retry connection
-            await self.connect()
 
     async def parse_message(self, data: dict[str, Any]) -> None:
         """Message received callback function for the XMPP client."""
@@ -310,7 +265,10 @@ class NefitEasy(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library."""
         if self.connected_state != STATE_CONNECTION_VERIFIED:
-            raise UpdateFailed("Nefit easy not connected!")
+            _LOGGER.debug("Starting reconnect procedure.")
+            await self.connect()
+            if self.connected_state != STATE_CONNECTION_VERIFIED:
+                raise UpdateFailed("Nefit easy not connected!")
 
         async with self._lock:
             _url = "/ecus/rrc/uiStatus"
