@@ -60,23 +60,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload nefit easy component."""
-    if not all(
-        await asyncio.gather(
-            *(
-                hass.config_entries.async_forward_entry_unload(entry, component)
-                for component in DOMAINS
-            )
-        )
-    ):
-        return False
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, DOMAINS)
 
-    client = hass.data[DOMAIN][entry.entry_id]["client"]
+    if unload_ok:
+        client = hass.data[DOMAIN][entry.entry_id]["client"]
 
-    await client.shutdown("Unload entry")
+        await client.shutdown("Unload entry")
 
-    hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN].pop(entry.entry_id)
 
-    return True
+    return unload_ok
 
 
 class NefitEasy(DataUpdateCoordinator):
