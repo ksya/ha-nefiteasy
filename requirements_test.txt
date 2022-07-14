@@ -1,4 +1,4 @@
-aionefit==0.14
+aionefit-updated==0.15
 pytest
 pytest-cov
 pytest-homeassistant-custom-component==0.5.12
