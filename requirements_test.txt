@@ -1,4 +1,4 @@
-aionefit==0.14
+aionefit-updated==0.15
 pylint==2.14.4
 pytest
 pytest-cov
