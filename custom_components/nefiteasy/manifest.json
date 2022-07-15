@@ -10,7 +10,7 @@
     "@marconfus"
   ],
   "requirements": [
-    "aionefit-updated==0.15"
+    "aionefit==0.14"
   ],
   "config_flow": true,
   "iot_class": "cloud_polling"

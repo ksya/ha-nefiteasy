@@ -1,9 +1,5 @@
-__pycache__
-pythonenv*
-venv
-.venv
-.coverage
-.idea
 #
 /.vs
+/venv
 .pytest_cache/
+__pycache__/

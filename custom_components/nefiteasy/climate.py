@@ -132,6 +132,8 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         """Return the current preset mode."""
+        if self.coordinator.data.get("user_mode") == "manual":
+            return OPERATION_MANUAL
         if self.coordinator.data.get("user_mode") == "clock":
             return OPERATION_CLOCK
 

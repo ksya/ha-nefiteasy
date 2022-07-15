@@ -5,11 +5,8 @@
         },
         "error": {
             "cannot_connect": "Failed to connect",
-            "cannot_communicate": "Failed to communicate",
             "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error",
-            "invalid_credentials": "Invalid serial number / access key combination",
-            "invalid_password": "Invalid password"
+            "unknown": "Unexpected error"
         },
         "step": {
             "options": {

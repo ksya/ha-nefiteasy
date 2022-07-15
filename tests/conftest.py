@@ -3,20 +3,19 @@ import asyncio
 import json
 from unittest.mock import MagicMock, patch
 
-from homeassistant.helpers import entity_registry as er
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.nefiteasy.const import SWITCHES
+from homeassistant.helpers import entity_registry as er
+
+from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 
 # This fixture enables loading custom integrations in all tests.
 # Remove to enable selective use of this fixture
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
-    """Switches on usage of custom integrations."""
     yield
-
 
 @pytest.fixture
 async def nefit_switch_wrapper(nefit_config, hass):
@@ -37,7 +36,6 @@ async def nefit_switch_wrapper(nefit_config, hass):
                 config_entry=config_entry,
                 original_name=description.name,
             )
-
 
 @pytest.fixture
 async def nefit_sensor_wrapper(nefit_config, hass):
@@ -180,15 +178,12 @@ class ClientMock:
 
         self.data = json.loads(load_fixture("nefit_data.json"))
 
-        self.failed_auth_handler = None
-
     def get(self, path):
         """Get data."""
         if path in self.data:
             loop = asyncio.get_event_loop()
-            if self.callback is not None:
-                coroutine = self.callback(self.data[path])
-                loop.create_task(coroutine)
+            coroutine = self.callback(self.data[path])
+            loop.create_task(coroutine)
 
         self.xmppclient.message_event.set()
 
@@ -197,7 +192,7 @@ class ClientMock:
         self.xmppclient.connected_event.set()
 
         self.serial_number = self.mock.call_args_list[0][1]["serial_number"]
-        self.callback = self.mock.call_args_list[0][1].get("message_callback")
+        self.callback = self.mock.call_args_list[0][1]["message_callback"]
 
         return
 

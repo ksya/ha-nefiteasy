@@ -1,20 +1,17 @@
 """Config flow for Nefit Easy Bosch Thermostat integration."""
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
-from aionefit import NefitCore
-from homeassistant import config_entries, core, exceptions
+import voluptuous as vol
+
+from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
-import voluptuous as vol
 
 from .const import (  # pylint:disable=unused-import
-    AUTH_ERROR_CREDENTIALS,
-    AUTH_ERROR_PASSWORD,
     CONF_ACCESSKEY,
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
@@ -26,85 +23,6 @@ from .const import (  # pylint:disable=unused-import
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class NefitConnection:
-    """Test the connection to NefitEasy and check read to verify description of messages."""
-
-    def __init__(self, serial_number: str, access_key: str, password: str) -> None:
-        """Initialize."""
-        self.nefit = NefitCore(
-            serial_number=serial_number,
-            access_key=access_key,
-            password=password,
-        )
-
-        self.nefit.failed_auth_handler = self.failed_auth_handler
-        self.nefit.no_content_callback = self.no_content_callback
-        self.nefit.session_end_callback = self.session_end_callback
-
-        self.auth_failure = None
-
-    async def failed_auth_handler(self, event: str) -> None:
-        """Report failed auth."""
-        if event == "auth_error_password":
-            self.auth_failure = AUTH_ERROR_PASSWORD
-            _LOGGER.debug("Invalid password for connecting to Bosch cloud.")
-        else:
-            self.auth_failure = AUTH_ERROR_CREDENTIALS
-            _LOGGER.debug(
-                "Invalid credentials (serial or accesskey) for connecting to Bosch cloud."
-            )
-
-        self.nefit.xmppclient.connected_event.set()
-
-    async def session_end_callback(self) -> None:
-        """Session end."""
-
-    async def no_content_callback(self, data: Any) -> None:
-        """No content."""
-
-    async def validate_connect(self) -> None:
-        """Test if we can connect and communicate with the device."""
-
-        await self.nefit.connect()
-        try:
-            await asyncio.wait_for(
-                self.nefit.xmppclient.connected_event.wait(), timeout=10.0
-            )
-        except asyncio.TimeoutError as ex:
-            self.nefit.xmppclient.cancel_connection_attempt()
-            raise CannotConnect from ex
-
-        if self.auth_failure == AUTH_ERROR_CREDENTIALS:
-            raise InvalidCredentials
-
-        self.nefit.get("/gateway/brandID")
-        try:
-            await asyncio.wait_for(
-                self.nefit.xmppclient.message_event.wait(), timeout=10.0
-            )
-        except asyncio.TimeoutError as ex:
-            await self.nefit.disconnect()
-            raise CannotCommunicate from ex
-
-        self.nefit.xmppclient.message_event.clear()
-
-        await self.nefit.disconnect()
-
-        if self.auth_failure == AUTH_ERROR_PASSWORD:
-            raise InvalidPassword
-
-
-async def _validate_nefiteasy_connection(
-    hass: core.HomeAssistant, data: dict[str, Any]
-) -> None:
-    """Validate the user input allows us to connect."""
-    conn = NefitConnection(
-        data.get(CONF_SERIAL), data[CONF_ACCESSKEY], data[CONF_PASSWORD]
-    )
-
-    await conn.validate_connect()
 
 
 class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -129,23 +47,11 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(user_input[CONF_SERIAL])
             self._abort_if_unique_id_configured()
 
-            try:
-                await _validate_nefiteasy_connection(self.hass, user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except CannotCommunicate:
-                errors["base"] = "cannot_communicate"
-            except InvalidCredentials:
-                errors["base"] = "invalid_credentials"
-            except InvalidPassword:
-                errors["base"] = "invalid_password"
+            self._serial = user_input[CONF_SERIAL]
+            self._accesskey = user_input[CONF_ACCESSKEY]
+            self._password = user_input[CONF_PASSWORD]
 
-            if not errors:
-                self._serial = user_input[CONF_SERIAL]
-                self._accesskey = user_input[CONF_ACCESSKEY]
-                self._password = user_input[CONF_PASSWORD]
-
-                return await self.async_step_options()
+            return await self.async_step_options()
 
         schema = vol.Schema(
             {
@@ -187,18 +93,11 @@ class NefitEasyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="options", data_schema=schema, errors=errors
         )
 
+    async def async_step_import(self, import_config: ConfigType) -> FlowResult:
+        """Handle the initial step."""
+        await self.async_set_unique_id(import_config[CONF_SERIAL])
+        self._abort_if_unique_id_configured()
 
-class CannotConnect(exceptions.HomeAssistantError):
-    """Error to indicate we cannot connect."""
-
-
-class CannotCommunicate(exceptions.HomeAssistantError):
-    """Error to indicate we cannot communicate."""
-
-
-class InvalidCredentials(exceptions.HomeAssistantError):
-    """Error to indicate we cannot verify credentials."""
-
-
-class InvalidPassword(exceptions.HomeAssistantError):
-    """Error to indicate we cannot verify password."""
+        return self.async_create_entry(
+            title=f"{import_config[CONF_SERIAL]}", data=import_config
+        )

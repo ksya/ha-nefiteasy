@@ -33,9 +33,6 @@ STATE_CONNECTION_VERIFIED = "connection_verified"
 STATE_INIT = "initializing"
 STATE_ERROR_AUTH = "authentication_failed"
 
-AUTH_ERROR_PASSWORD = "auth_error_password"
-AUTH_ERROR_CREDENTIALS = "auth_error_credentials"
-
 name = "name"
 url = "url"
 unit = "unit"
@@ -193,9 +190,9 @@ NUMBERS: tuple[NefitNumberEntityDescription, ...] = (
         name="Shower timer duration",
         url="/dhwCircuits/dhwA/extraDhw/duration",
         icon="mdi:timer-outline",
-        native_min_value=0,
-        native_max_value=60,
-        native_step=1,
+        min_value=0,
+        max_value=60,
+        step=1,
         entity_registry_enabled_default=False,
     ),
 )

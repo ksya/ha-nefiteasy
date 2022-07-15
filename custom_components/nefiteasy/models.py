@@ -41,6 +41,6 @@ class NefitSensorEntityDescription(NefitEntityDescription, SensorEntityDescripti
 class NefitNumberEntityDescription(NefitEntityDescription, NumberEntityDescription):
     """Represents a nefiteasy Number."""
 
-    native_min_value: float | None = None
-    native_max_value: float | None = None
-    native_step: float | None = None
+    min_value: float | None = None
+    max_value: float | None = None
+    step: float | None = None

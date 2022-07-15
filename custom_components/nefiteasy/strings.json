@@ -18,10 +18,8 @@
     },
     "error": {
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "cannot_communicate": "Failed to communicate",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "invalid_credentials": "Invalid serial number / access key combination",
-      "invalid_password": "Invalid password"
+      "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"

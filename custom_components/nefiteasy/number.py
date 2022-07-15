@@ -49,18 +49,18 @@ class NefitNumber(NefitEntity, NumberEntity):
         """Init Nefit Switch."""
         super().__init__(entity_description, client, data)
 
-        if entity_description.native_min_value is not None:
-            self._attr_native_min_value = entity_description.native_min_value
-        if entity_description.native_max_value is not None:
-            self._attr_native_max_value = entity_description.native_max_value
-        if entity_description.native_step is not None:
-            self._attr_native_step = entity_description.native_step
+        if entity_description.min_value is not None:
+            self._attr_min_value = entity_description.min_value
+        if entity_description.max_value is not None:
+            self._attr_max_value = entity_description.max_value
+        if entity_description.step is not None:
+            self._attr_step = entity_description.step
 
     @property
-    def native_value(self) -> float | None:
+    def value(self) -> float | None:
         """Return the entity value to represent the entity state."""
         return self.coordinator.data.get(self.entity_description.key)
 
-    async def async_set_native_value(self, value: float) -> None:
+    async def async_set_value(self, value: float) -> None:
         """Update the current value."""
         self._client.nefit.put_value(self.get_endpoint(), value)

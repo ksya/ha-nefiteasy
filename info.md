@@ -11,7 +11,7 @@ All configuration can be done from within Home Assistant:
 
 
 ### Limit sensors and switches
-Just disable the entities from UI you dont want. Those will not be updated anymore.
+Just disable the enitities from UI you dont want. Those will not be updated anymore.
 
 ## Available sensors & switches
 ### Sensors
