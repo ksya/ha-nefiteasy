@@ -3,7 +3,7 @@ Nefit Easy connection for Home Assistant
 
 ![Build](https://github.com/ksya/ha-nefiteasy/actions/workflows/push.yml/badge.svg)
 
-Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng compontent! 
+Big thanks to marconfus for the aionefit library and his work on the ha-nefit-ng component! 
 * https://github.com/marconfus/aionefit
 * https://github.com/marconfus/ha-nefit-ng
 

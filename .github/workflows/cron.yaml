@@ -1,21 +1,22 @@
 name: Cron actions
 
+# yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
   validate:
     runs-on: "ubuntu-latest"
     name: Validate
     steps:
-        - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v3"
 
-        - name: HACS validation
-          uses: "hacs/action@main"
-          with:
-            category: "integration"
-            ignore: topics
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+          ignore: topics
 
-        - name: Hassfest validation
-          uses: "home-assistant/actions/hassfest@master"
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"

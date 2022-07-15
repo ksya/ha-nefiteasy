@@ -1,45 +1,132 @@
 name: Pull actions
 
+# yamllint disable-line rule:truthy
 on:
   pull_request:
 
 jobs:
   validate:
     runs-on: "ubuntu-latest"
-    name: Validate
+    name: Validate HACS
     steps:
-        - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v3"
 
-        - name: HACS validation
-          uses: "hacs/action@main"
-          with:
-            category: "integration"
-            ignore: topics
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+          ignore: topics
 
-        - name: Hassfest validation
-          uses: "home-assistant/actions/hassfest@master"
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@master"
 
-  style:
-    runs-on: "ubuntu-latest"
-    name: Check style formatting
+  lint-black:
+    name: Check black
+    runs-on: ubuntu-latest
     steps:
-        - uses: "actions/checkout@v2"
-        - uses: "actions/setup-python@v2.3.1"
-          with:
-            python-version: "3.x"
-        - run: python3 -m pip install black
-        - run: black .
+      - name: Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: "3.x"
+      - name: Setup pre-commit
+        run: |
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Run black
+        run: pre-commit run --hook-stage manual black --all-files --show-diff-on-failure
+
+  lint-isort:
+    name: Check isort
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: "3.x"
+      - name: Setup pre-commit
+        run: |
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Run isort
+        run: pre-commit run --hook-stage manual isort --all-files --show-diff-on-failure
+
+  lint-flake8:
+    name: Check flake8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: "3.x"
+      - name: Setup pre-commit
+        run: |
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Register flake8 problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/flake8.json"
+      - name: Run flake8
+        run: pre-commit run --hook-stage manual flake8 --all-files
+
+  lint-other:
+    name: Check other linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: "3.x"
+      - name: Setup pre-commit
+        run: |
+          python3 -m pip install pre-commit
+          pre-commit install
+      - name: Run pyupgrade
+        run: pre-commit run --hook-stage manual pyupgrade --all-files --show-diff-on-failure
+      - name: Register yamllint problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/yamllint.json"
+      - name: Run yamllint
+        run: pre-commit run --hook-stage manual yamllint --all-files --show-diff-on-failure
+      - name: Register check-json problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/check-json.json"
+      - name: Run check-json
+        run: pre-commit run --hook-stage manual check-json --all-files
+      - name: Register check executables problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/check-executables-have-shebangs.json"
+      - name: Run executables check
+        run: pre-commit run --hook-stage manual check-executables-have-shebangs --all-files
+      - name: Register codespell problem matcher
+        run: |
+          echo "::add-matcher::.github/workflows/matchers/codespell.json"
+      - name: Run codespell
+        run: pre-commit run --show-diff-on-failure --hook-stage manual codespell --all-files
+      - name: Run bandit
+        run: pre-commit run --hook-stage manual bandit --all-files --show-diff-on-failure
 
   tests:
     runs-on: "ubuntu-latest"
     name: Run tests
     steps:
       - name: Check out code from GitHub
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v3"
       - name: Setup Python
-        uses: "actions/setup-python@v2.3.1"
+        uses: "actions/setup-python@v4"
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Install requirements
         run: python3 -m pip install -r requirements_test.txt
       - name: Run tests
