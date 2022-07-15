@@ -193,9 +193,9 @@ NUMBERS: tuple[NefitNumberEntityDescription, ...] = (
         name="Shower timer duration",
         url="/dhwCircuits/dhwA/extraDhw/duration",
         icon="mdi:timer-outline",
-        min_value=0,
-        max_value=60,
-        step=1,
+        native_min_value=0,
+        native_max_value=60,
+        native_step=1,
         entity_registry_enabled_default=False,
     ),
 )
