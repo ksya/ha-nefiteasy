@@ -82,6 +82,17 @@
         "minValue": 0.0,
         "maxValue": 25.0
     },
+    "/system/appliance/actualPower": {
+        "id": "/system/appliance/actualPower",
+        "type": "floatValue",
+        "recordable": 0,
+        "writeable": 0,
+        "value": 0.0,
+        "unitOfMeasure": "%",
+        "minValue": 0.0,
+        "maxValue": 100.0,
+        "reason": "HW"
+    },
     "/system/sensors/temperatures/outdoor_t1": {
         "id": "/system/sensors/temperatures/outdoor_t1",
         "type": "floatValue",
