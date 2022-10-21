@@ -6,7 +6,12 @@ from homeassistant.components.sensor import (
     STATE_CLASS_TOTAL_INCREASING,
     SensorDeviceClass,
 )
-from homeassistant.const import PRESSURE_BAR, TEMP_CELSIUS, VOLUME_CUBIC_METERS
+from homeassistant.const import (
+    PERCENTAGE,
+    PRESSURE_BAR,
+    TEMP_CELSIUS,
+    VOLUME_CUBIC_METERS,
+)
 
 from .models import (
     NefitNumberEntityDescription,
@@ -92,6 +97,14 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/system/appliance/systemPressure",
         unit=PRESSURE_BAR,
         device_class=SensorDeviceClass.PRESSURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    NefitSensorEntityDescription(
+        key="actual_power",
+        name="Power",
+        url="/system/appliance/actualPower",
+        unit=PERCENTAGE,
+        device_class=SensorDeviceClass.POWER_FACTOR,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     NefitSensorEntityDescription(
