@@ -6,7 +6,12 @@ from homeassistant.components.sensor import (
     STATE_CLASS_TOTAL_INCREASING,
     SensorDeviceClass,
 )
-from homeassistant.const import PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS, VOLUME_CUBIC_METERS
+from homeassistant.const import (
+    PERCENTAGE,
+    PRESSURE_BAR,
+    TEMP_CELSIUS,
+    VOLUME_CUBIC_METERS,
+)
 
 from .models import (
     NefitNumberEntityDescription,
