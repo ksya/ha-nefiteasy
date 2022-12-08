@@ -23,6 +23,7 @@ Just disable the entities from UI you dont want. Those will not be updated anymo
 - system_pressure
 - active_program
 - hot_water_operation
+- target_temperature
 ```
 
 ### Switches
