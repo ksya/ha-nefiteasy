@@ -59,6 +59,13 @@ async def nefit_sensor_wrapper(nefit_config, hass):
         config_entry=config_entry,
         original_name="Inhouse temperature",
     )
+    entity_registry.async_get_or_create(
+        domain="sensor",
+        platform="nefiteasy",
+        unique_id="123456789_target_temperature",
+        config_entry=config_entry,
+        original_name="Target temperature",
+    )
 
 
 @pytest.fixture
