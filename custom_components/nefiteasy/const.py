@@ -122,6 +122,15 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         entity_registry_enabled_default=False,
     ),
+    NefitSensorEntityDescription(
+        key="target_temperature",
+        name="Target temperature",
+        short="TSP",
+        unit=TEMP_CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        entity_registry_enabled_default=False,
+    ),
 )
 
 SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (

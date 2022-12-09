@@ -44,6 +44,7 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 - active_program
 - hot_water_operation
 - inhouse_temperature
+- target_temperature
 ```
 
 ### Controls
