@@ -2,4 +2,4 @@ aionefit-updated==0.15
 pylint==2.15.9
 pytest
 pytest-cov
-pytest-homeassistant-custom-component==0.12.43
+pytest-homeassistant-custom-component==0.12.55
