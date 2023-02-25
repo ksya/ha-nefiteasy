@@ -1,17 +1,17 @@
 {
   "domain": "nefiteasy",
   "name": "Nefit Easy Bosch Thermostat",
-  "version": "0.4.0b1",
-  "documentation": "https://github.com/ksya/ha-nefiteasy",
-  "issue_tracker": "https://github.com/ksya/ha-nefiteasy/issues",
-  "dependencies": [],
   "codeowners": [
     "@ksya",
     "@marconfus"
   ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/ksya/ha-nefiteasy",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/ksya/ha-nefiteasy/issues",
   "requirements": [
     "aionefit-updated==0.15"
-  ],
-  "config_flow": true,
-  "iot_class": "cloud_polling"
+  ],  
+  "version": "0.4.0b1"  
 }
