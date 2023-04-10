@@ -10,6 +10,12 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, load_f
 from custom_components.nefiteasy.const import SWITCHES
 
 
+@pytest.fixture(autouse=True)
+def expected_lingering_timers() -> bool:
+    """Temporary to allow for lingering timers."""
+    return True
+
+
 # This fixture enables loading custom integrations in all tests.
 # Remove to enable selective use of this fixture
 @pytest.fixture(autouse=True)
