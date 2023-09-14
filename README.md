@@ -35,20 +35,20 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 
 ## Controls/Switches & Sensors
 
-### Controles/Switches
+### Controls/Switches
 
 > None enabled by default.
 
 | Key | Name | Description |
 | - | - | -  |
-| active_program | Active porgram | Clock [program] 1 or 2 |
+| active_program | Active program | Clock [program] 1 or 2 |
 | fireplace_mode | Fireplace mode | Other rooms stay warm as the fire burns |
 | holiday_mode | Holiday mode | Define settings in the app. Activate/Deactivate them in Home Assistant |
 | hot_water | Hot water | Hot water preheat |
 | home_entrance_detection | Presence | "The Nefit Easy detects the presence of the smart device in the home and adjusts the room temperature accordingly.<br><br>To let this function, operate mobile Internet and Wi-Fi must be enabled continuously. Location services must be enabled in the settings; optionally you can use the location modus -> battery saving if your device supports it." |
 | lockui | Lock UI | "Manual operation of the thermostat can be locked to prevent unintended adjustments." |
 | preheating | Preheating | |
-| shower_timer | Shower timer | "Shortening the duration of showering helps save energy.<br><br>3 minutes prior to the alloted time set cold water will come out of the hot water tap temporarily. When the alloted tome has fully passed, cold water will come out of the hot water tap until the tap is closed." |
+| shower_timer | Shower timer | "Shortening the duration of showering helps save energy.<br><br>3 minutes prior to the allotted time set cold water will come out of the hot water tap temporarily. When the allotted tome has fully passed, cold water will come out of the hot water tap until the tap is closed." |
 | shower_timer_duration | Shower timer duration | Set time for the 'Shower timer' in minutes. |
 | today_as_sunday | Today as Sunday | |
 | tomorrow_as_sunday | Tomorrow as Sunday
