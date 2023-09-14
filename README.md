@@ -60,12 +60,12 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 | - | - | :-: | - | :-: |
 | actual_power | Power | | | &#x2714; |
 | hot_water_operation | Hot water operation |  | "When 'Follow program' is off, preheat function will be active or your indirect storage tank will remain heated.<br><br>Follow heating program: Hot water will be heated inline with heating 'Wakeup' & 'Home' activities, but extended one hour before and after these periods.<br><br>Custom program: Use this to set an independent hot water clock program.<br><br>For combi boilers: To disable preheat permanently, please refer to the boiler user manual." | &#x274C; |
-| inhouse_temperature | Inhouse temperature | C° | Current room temperature | &#x274C; |
-| outdoor_temperature | Outdoor temperature | C° | Outdoor temperature | &#x2714; |
+| inhouse_temperature | Inhouse temperature | °C | Current room temperature | &#x274C; |
+| outdoor_temperature | Outdoor temperature | °C | Outdoor temperature | &#x2714; |
 | status | status | | Status of the boiler | &#x2714; |
-| supply_temperature | Supply temperature | C° | Temperature of (hot) water ready to supply | &#x2714; |
+| supply_temperature | Supply temperature | °C | Temperature of (hot) water ready to supply | &#x2714; |
 | system_pressure | System pressure | Bar | System water pressure | &#x2714; |
-| target_temperature | Target temperature | C° | Target temperature | &#x274C; |
+| target_temperature | Target temperature | °C | Target temperature | &#x274C; |
 | year_total | Year total | m<sup>3</sup> | Volume of gas consumed since Jan 1<sup>st</sup> | &#x2714; |
 
 #### Sensor values
