@@ -63,7 +63,7 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 | inhouse_temperature | Inhouse temperature | C° | Current room temperature | &#x274C; |
 | outdoor_temperature | Outdoor temperature | C° | Outdoor temperature | &#x2714; |
 | status | status | | Status of the boiler | &#x2714; |
-| supply_temperature | Supply temperature | C° | Temperature of incoming water | &#x2714; |
+| supply_temperature | Supply temperature | C° | Temperature of (hot) water ready to supply | &#x2714; |
 | system_pressure | System pressure | Bar | System water pressure | &#x2714; |
 | target_temperature | Target temperature | C° | Target temperature | &#x274C; |
 | year_total | Year total | m<sup>3</sup> | Volume of gas consumed since Jan 1<sup>st</sup> | &#x2714; |
