@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-python@v5
         id: python
         with:
-          python-version: "3.x"
+          python-version: "3.11"
       - name: Setup pre-commit
         run: |
           python3 -m pip install pre-commit
