@@ -13,6 +13,7 @@ from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+import slixmpp
 
 from .const import (
     CONF_ACCESSKEY,
@@ -145,7 +146,11 @@ class NefitEasy(DataUpdateCoordinator):
                 self.connected_state = STATE_CONNECTED
 
             if self.connected_state == STATE_CONNECTED:
-                self.nefit.get("/gateway/brandID")
+                try:
+                    self.nefit.get("/gateway/brandID")
+                except slixmpp.xmlstream.xmlstream.NotConnectedError:
+                    self.connected_state == STATE_INIT
+                    return
                 try:
                     await asyncio.wait_for(
                         self.nefit.xmppclient.message_event.wait(), timeout=29.0
