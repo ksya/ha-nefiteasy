@@ -33,34 +33,62 @@ All configuration can be done from within Home Assistant:
 ### Limit sensors and switches
 Some entities are disabled by default, if needed they can be enabled. Entities that are disabled will not be updated.
 
-## Available sensors & switches
-### Sensors
-```
-- year_total
-- status
-- supply_temperature
-- outdoor_temperature
-- system_pressure
-- active_program
-- hot_water_operation
-- inhouse_temperature
-- target_temperature
-```
+## Controls/Switches & Sensors
 
-### Controls
+### Controls/Switches
+
+> None enabled by default.
+
+| Key | Name | Description |
+| - | - | -  |
+| active_program | Active program | Clock [program] 1 or 2 |
+| fireplace_mode | Fireplace mode | Other rooms stay warm as the fire burns |
+| holiday_mode | Holiday mode | Define settings in the app. Activate/Deactivate them in Home Assistant |
+| hot_water | Hot water | Hot water preheat |
+| home_entrance_detection | Presence | "The Nefit Easy detects the presence of the smart device in the home and adjusts the room temperature accordingly.<br><br>To let this function, operate mobile Internet and Wi-Fi must be enabled continuously. Location services must be enabled in the settings; optionally you can use the location modus -> battery saving if your device supports it." |
+| lockui | Lock UI | "Manual operation of the thermostat can be locked to prevent unintended adjustments." |
+| preheating | Preheating | |
+| shower_timer | Shower timer | "Shortening the duration of showering helps save energy.<br><br>3 minutes prior to the allotted time set cold water will come out of the hot water tap temporarily. When the allotted tome has fully passed, cold water will come out of the hot water tap until the tap is closed." |
+| shower_timer_duration | Shower timer duration | Set time for the 'Shower timer' in minutes. |
+| today_as_sunday | Today as Sunday | |
+| tomorrow_as_sunday | Tomorrow as Sunday
+| weather_dependent | Weather dependent | "Weather compensation control based on the local outdoor temperature.<br><br> Weather compensation control is best used with thermostatic radiator valves or thermostatically controlled radiant heating.<br><br>Please note:<br>The control is not based on the measured room temperature. Weather compensation control is comfort enhancing, but may result in increased heating costs. This control requires knowledge of weather compensation control. Ask your installer for support." |
+
+### Sensors
+
+| Key | Name | UoM | Description | Enabled by default |
+| - | - | :-: | - | :-: |
+| actual_power | Power | | | &#x2714; |
+| hot_water_operation | Hot water operation |  | "When 'Follow program' is off, preheat function will be active or your indirect storage tank will remain heated.<br><br>Follow heating program: Hot water will be heated inline with heating 'Wakeup' & 'Home' activities, but extended one hour before and after these periods.<br><br>Custom program: Use this to set an independent hot water clock program.<br><br>For combi boilers: To disable preheat permanently, please refer to the boiler user manual." | &#x274C; |
+| inhouse_temperature | Inhouse temperature | °C | Current room temperature | &#x274C; |
+| outdoor_temperature | Outdoor temperature | °C | Outdoor temperature | &#x2714; |
+| status | status | | Status of the boiler | &#x2714; |
+| supply_temperature | Supply temperature | °C | Temperature of (hot) water ready to supply | &#x2714; |
+| system_pressure | System pressure | Bar | System water pressure | &#x2714; |
+| target_temperature | Target temperature | °C | Target temperature | &#x274C; |
+| year_total | Year total | m<sup>3</sup> | Volume of gas consumed since Jan 1<sup>st</sup> | &#x2714; |
+
+#### Sensor values
+
+##### Status
+
+| Code | Description |
+| :-: | - |
+| -H | central heating active |
+| =H | hot water active |
+| 0C<br>0L<br>0U | system starting |
+| 0E | system waiting |
+| 0H | system standby |
+| 0A<br>0Y | system waiting (boiler cannot transfer heat to central heating) |
+| 2E<br>H07 | boiler water pressure too low |
+| 2F<br>2L<br>2P<br>2U<br>4F<br>4L | sensors measured abnormal temperature |
+| 6A<br>6C | burner doesn't ignite |
+| rE | system restarting |
+
+
+##### Hot water operation
 ```
-- hot_water
-- holiday_mode
-- fireplace_mode
-- today_as_sunday
-- tomorrow_as_sunday
-- preheating
-- home_entrance_detection
-- weather_dependent
-- lockui
-- active_program
-- shower_timer
-- shower_timer_duration
+- follow-ch
 ```
 
 ## Debugging problems
