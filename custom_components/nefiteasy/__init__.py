@@ -150,6 +150,7 @@ class NefitEasy(DataUpdateCoordinator):
                     self.nefit.get("/gateway/brandID")
                 except slixmpp.xmlstream.xmlstream.NotConnectedError:
                     self.connected_state == STATE_INIT
+                    self.is_connecting = False
                     return
                 try:
                     await asyncio.wait_for(
