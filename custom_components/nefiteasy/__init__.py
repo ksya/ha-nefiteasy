@@ -129,6 +129,7 @@ class NefitEasy(DataUpdateCoordinator):
         """Connect to nefit easy."""
         _LOGGER.debug("Start connecting.")
         if not self.is_connecting:
+            _LOGGER.debug("Set is connecting to true")
             self.is_connecting = True
 
             await self.nefit.connect()
@@ -150,9 +151,14 @@ class NefitEasy(DataUpdateCoordinator):
                     self.nefit.get("/gateway/brandID")
                 except slixmpp.xmlstream.xmlstream.NotConnectedError:
                     self.connected_state == STATE_INIT
+                    _LOGGER.debug("Set is connecting to false")
                     self.is_connecting = False
                     return
+
                 try:
+                    _LOGGER.debug(
+                        "Wait for message event"
+                    )
                     await asyncio.wait_for(
                         self.nefit.xmppclient.message_event.wait(), timeout=29.0
                     )
@@ -163,6 +169,9 @@ class NefitEasy(DataUpdateCoordinator):
                 except:  # noqa: E722 pylint: disable=bare-except
                     _LOGGER.debug("No connection while testing connection.")
                 else:
+                    _LOGGER.debug(
+                        "Message event received"
+                    )
                     self.nefit.xmppclient.message_event.clear()
 
                     # No exception and no auth error
@@ -172,6 +181,7 @@ class NefitEasy(DataUpdateCoordinator):
             if self.connected_state != STATE_CONNECTION_VERIFIED:
                 _LOGGER.debug("Successfully verified connection.")
 
+            _LOGGER.debug("Set is connecting to false")
             self.is_connecting = False
         else:
             _LOGGER.debug("Connection procedure is already running.")
