@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from homeassistant.components.sensor import (
-    STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
+    SensorStateClass.MEASUREMENT,
+    SensorStateClass.TOTAL_INCREASING,
     SensorDeviceClass,
 )
 from homeassistant.const import (
@@ -70,7 +70,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/ecus/rrc/recordings/yearTotal",
         unit=UnitOfVolume.CUBIC_METERS,
         device_class=SensorDeviceClass.GAS,
-        state_class=STATE_CLASS_TOTAL_INCREASING,
+        state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     NefitSensorEntityDescription(
         key="status", name="status", url="/system/appliance/displaycode"
@@ -81,7 +81,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/heatingCircuits/hc1/actualSupplyTemperature",
         unit=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     NefitSensorEntityDescription(
         key="outdoor_temperature",
@@ -89,7 +89,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/system/sensors/temperatures/outdoor_t1",
         unit=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     NefitSensorEntityDescription(
         key="system_pressure",
@@ -97,7 +97,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/system/appliance/systemPressure",
         unit=UnitOfPressure.BAR,
         device_class=SensorDeviceClass.PRESSURE,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     NefitSensorEntityDescription(
         key="actual_power",
@@ -105,7 +105,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         url="/system/appliance/actualPower",
         unit=PERCENTAGE,
         device_class=SensorDeviceClass.POWER_FACTOR,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     NefitSensorEntityDescription(
         key="hot_water_operation",
@@ -119,7 +119,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         short="IHT",
         unit=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
         entity_registry_enabled_default=False,
     ),
     NefitSensorEntityDescription(
@@ -128,7 +128,7 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         short="TSP",
         unit=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=STATE_CLASS_MEASUREMENT,
+        state_class=SensorStateClass.MEASUREMENT,
         entity_registry_enabled_default=False,
     ),
 )
