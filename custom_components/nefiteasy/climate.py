@@ -120,7 +120,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         if (
             self.coordinator.data.get("boiler_indicator") == "CH"
         ):  # HW (hot water) is not for climate
-            return HVACAction.HEATING
+            return HVACAction.HEAT
 
         return HVACAction.IDLE
 
