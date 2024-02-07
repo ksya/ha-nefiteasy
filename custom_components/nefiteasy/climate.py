@@ -8,7 +8,7 @@ from typing import Any
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
-    HVACAction.HEATING,
+    HVACAction.HEAT,
     HVACAction.IDLE,
     HVACMode.HEAT,
     ClimateEntityFeature.PRESET_MODE,
