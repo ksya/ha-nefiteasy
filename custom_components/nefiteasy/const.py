@@ -220,4 +220,14 @@ NUMBERS: tuple[NefitNumberEntityDescription, ...] = (
         native_step=1,
         entity_registry_enabled_default=False,
     ),
+    NefitNumberEntityDescription(
+        key="temperature_adjustment",
+        name="Temperature adjustment",
+        url="/heatingCircuits/hc1/temperatureAdjustment",
+        icon="mdi:adjust",
+        native_min_value=-2,
+        native_max_value=2,
+        native_step=0.1,
+        entity_registry_enabled_default=False,
+    ),
 )

@@ -53,6 +53,7 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 | today_as_sunday | Today as Sunday | |
 | tomorrow_as_sunday | Tomorrow as Sunday
 | weather_dependent | Weather dependent | "Weather compensation control based on the local outdoor temperature.<br><br> Weather compensation control is best used with thermostatic radiator valves or thermostatically controlled radiant heating.<br><br>Please note:<br>The control is not based on the measured room temperature. Weather compensation control is comfort enhancing, but may result in increased heating costs. This control requires knowledge of weather compensation control. Ask your installer for support." |
+| temperature_adjustment | Temperature Adjustment | Calibrate the measured temperature between +2 and -2 °C. |
 
 ### Sensors
 
