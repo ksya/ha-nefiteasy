@@ -1,9 +1,9 @@
 """Tests of the nefiteasy sensor integration."""
 from datetime import timedelta
 
+from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from homeassistant.util.dt import utcnow
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 
@@ -20,10 +20,13 @@ async def test_disabled_sensor_default(hass: HomeAssistant, nefit_wrapper):
     assert entry.disabled is True
 
 
-async def test_sensor_states(hass: HomeAssistant, nefit_wrapper):
+async def test_sensor_states(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, nefit_wrapper
+):
     """Test sensor states for default enabled sensors."""
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get("sensor.year_total")
     assert state
@@ -51,11 +54,15 @@ async def test_sensor_states(hass: HomeAssistant, nefit_wrapper):
 
 
 async def test_sensor_states_disabled(
-    hass: HomeAssistant, nefit_sensor_wrapper, nefit_wrapper
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    nefit_sensor_wrapper,
+    nefit_wrapper,
 ):
     """Test sensor states for default disabled sensors."""
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get("sensor.nefiteasy_123456789_hot_water_operation")
     assert state

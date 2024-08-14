@@ -49,12 +49,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     else:
         raise ConfigEntryNotReady
 
-    await client.async_refresh()
+    await hass.config_entries.async_forward_entry_setups(entry, DOMAINS)
 
-    for domain in DOMAINS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, domain)
-        )
+    await client.async_refresh()
 
     return True
 
@@ -156,9 +153,8 @@ class NefitEasy(DataUpdateCoordinator):
                     return
 
                 try:
-                    _LOGGER.debug(
-                        "Wait for message event"
-                    )
+                    _LOGGER.debug("Wait for message event")
+
                     await asyncio.wait_for(
                         self.nefit.xmppclient.message_event.wait(), timeout=29.0
                     )
@@ -169,9 +165,8 @@ class NefitEasy(DataUpdateCoordinator):
                 except:  # noqa: E722 pylint: disable=bare-except
                     _LOGGER.debug("No connection while testing connection.")
                 else:
-                    _LOGGER.debug(
-                        "Message event received"
-                    )
+                    _LOGGER.debug("Message event received")
+
                     self.nefit.xmppclient.message_event.clear()
 
                     # No exception and no auth error
