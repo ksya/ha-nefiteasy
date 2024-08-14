@@ -93,12 +93,16 @@ async def test_setup_invalid_password(mock_class, hass: HomeAssistant):
     client = ClientMock(mock_class)
     mock_class.return_value = client
 
+    async def set_msg_event():
+        client.xmppclient.message_event.set()
+
     def get(path):
         loop = asyncio.get_event_loop()
         coroutine = client.failed_auth_handler("auth_error_password")
         loop.create_task(coroutine)
 
-        client.xmppclient.message_event.set()
+        coroutine2 = set_msg_event()
+        loop.create_task(coroutine2)
 
     client.get = get
 
