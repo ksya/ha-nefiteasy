@@ -156,9 +156,7 @@ class NefitEasy(DataUpdateCoordinator):
                     return
 
                 try:
-                    _LOGGER.debug(
-                        "Wait for message event"
-                    )
+                    _LOGGER.debug("Wait for message event")
                     await asyncio.wait_for(
                         self.nefit.xmppclient.message_event.wait(), timeout=29.0
                     )
@@ -169,9 +167,7 @@ class NefitEasy(DataUpdateCoordinator):
                 except:  # noqa: E722 pylint: disable=bare-except
                     _LOGGER.debug("No connection while testing connection.")
                 else:
-                    _LOGGER.debug(
-                        "Message event received"
-                    )
+                    _LOGGER.debug("Message event received")
                     self.nefit.xmppclient.message_event.clear()
 
                     # No exception and no auth error
