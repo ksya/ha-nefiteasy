@@ -49,12 +49,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     else:
         raise ConfigEntryNotReady
 
-    await client.async_refresh()
+    await hass.config_entries.async_forward_entry_setups(entry, DOMAINS)
 
-    for domain in DOMAINS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, domain)
-        )
+    await client.async_refresh()
 
     return True
 
