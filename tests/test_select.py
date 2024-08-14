@@ -1,6 +1,7 @@
 """Tests of the nefiteasy select integration."""
 from datetime import timedelta
 
+from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.select import (
     DOMAIN as SELECT_DOMAIN,
     SERVICE_SELECT_OPTION,
@@ -9,7 +10,6 @@ from homeassistant.components.select.const import ATTR_OPTION
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from homeassistant.util.dt import utcnow
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 
@@ -24,7 +24,12 @@ async def test_disabled_select_default(hass: HomeAssistant, nefit_wrapper):
     assert entry.disabled is True
 
 
-async def test_active_program(hass: HomeAssistant, nefit_select_wrapper, nefit_wrapper):
+async def test_active_program(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    nefit_select_wrapper,
+    nefit_wrapper,
+):
     """Test setup of select entity."""
     entity_id = "select.nefiteasy_123456789_active_program"
 
@@ -33,8 +38,9 @@ async def test_active_program(hass: HomeAssistant, nefit_select_wrapper, nefit_w
     entry = entity_registry.async_get(entity_id)
     assert entry
 
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get(entity_id)
     assert state
@@ -49,10 +55,11 @@ async def test_active_program(hass: HomeAssistant, nefit_select_wrapper, nefit_w
         },
         blocking=True,
     )
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
 
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get(entity_id)
     assert state.state == "Clock 2"
