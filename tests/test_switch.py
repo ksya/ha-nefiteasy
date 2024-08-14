@@ -1,6 +1,7 @@
 """Tests of the nefiteasy sensor integration."""
 from datetime import timedelta
 
+from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.switch import (
     DOMAIN as SWITCH_DOMAIN,
     SERVICE_TURN_OFF,
@@ -9,7 +10,6 @@ from homeassistant.components.switch import (
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
-from homeassistant.util.dt import utcnow
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 
@@ -54,10 +54,16 @@ async def test_disabled_switch_default(hass: HomeAssistant, nefit_wrapper):
     assert entry.disabled is True
 
 
-async def test_switch_states(hass: HomeAssistant, nefit_switch_wrapper, nefit_wrapper):
+async def test_switch_states(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    nefit_switch_wrapper,
+    nefit_wrapper,
+):
     """Test states of switches."""
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get("switch.nefiteasy_123456789_hot_water")
     assert state
@@ -126,7 +132,10 @@ async def test_switch_turn_on_off(
 
 
 async def test_presence_detection(
-    hass: HomeAssistant, nefit_config, nefit_wrapper_precense
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    nefit_config,
+    nefit_wrapper_precense,
 ):
     """Test presence detection."""
     client = nefit_wrapper_precense
@@ -136,8 +145,9 @@ async def test_presence_detection(
     entry = entity_registry.async_get("switch.presence_my_device")
     assert entry
 
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get("switch.presence_my_device")
     assert state
@@ -147,8 +157,9 @@ async def test_presence_detection(
         "value"
     ] = "off"
 
-    async_fire_time_changed(hass, utcnow() + timedelta(seconds=61))
-    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=65))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     state = hass.states.get("switch.presence_my_device")
     assert state
