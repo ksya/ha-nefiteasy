@@ -8,14 +8,12 @@ from typing import Any
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
-    CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_IDLE,
-    HVAC_MODE_HEAT,
-    SUPPORT_PRESET_MODE,
-    SUPPORT_TARGET_TEMPERATURE,
+    ClimateEntityFeature,
+    HVACAction,
+    HVACMode,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE, TEMP_CELSIUS
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -32,7 +30,9 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE | SUPPORT_PRESET_MODE
+SUPPORT_FLAGS = (
+    ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
+)
 
 # supported operating modes (preset mode)
 OPERATION_MANUAL = "Manual"
@@ -64,8 +64,8 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         self._config = data
         self._client = client
 
-        self._unit_of_measurement = TEMP_CELSIUS
-        self._hvac_modes = [HVAC_MODE_HEAT]
+        self._unit_of_measurement = UnitOfTemperature.CELSIUS
+        self._hvac_modes = [HVACMode.HEAT]
 
         self._attr_unique_id = "{}_{}".format(client.nefit.serial_number, "climate")
         self._attr_device_info = {
@@ -112,7 +112,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def hvac_mode(self) -> str:
         """Return hvac mode."""
-        return HVAC_MODE_HEAT
+        return HVACMode.HEAT
 
     @property
     def hvac_action(self) -> str:
@@ -120,9 +120,9 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         if (
             self.coordinator.data.get("boiler_indicator") == "CH"
         ):  # HW (hot water) is not for climate
-            return CURRENT_HVAC_HEAT
+            return HVACAction.HEATING
 
-        return CURRENT_HVAC_IDLE
+        return HVACAction.IDLE
 
     @property
     def preset_modes(self) -> list[str]:
