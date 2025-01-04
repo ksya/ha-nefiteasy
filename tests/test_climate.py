@@ -7,7 +7,7 @@ from homeassistant.components.climate import (
 from homeassistant.components.climate.const import (
     ATTR_CURRENT_TEMPERATURE,
     ATTR_PRESET_MODE,
-    HVAC_MODE_HEAT,
+    HVACMode,
 )
 from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE
 from homeassistant.core import HomeAssistant
@@ -23,7 +23,7 @@ async def test_climate_device(hass: HomeAssistant, nefit_wrapper):
 
     thermostat = hass.states.get("climate.nefit")
     assert thermostat
-    assert thermostat.state == HVAC_MODE_HEAT
+    assert thermostat.state == HVACMode.HEAT
     assert thermostat.attributes[ATTR_PRESET_MODE] == "Clock"
     assert thermostat.attributes[ATTR_TEMPERATURE] == 20.0
     assert thermostat.attributes[ATTR_CURRENT_TEMPERATURE] == 17.50
@@ -54,7 +54,7 @@ async def test_climate_set_mode(hass: HomeAssistant, nefit_wrapper):
 
     thermostat = hass.states.get("climate.nefit")
     assert thermostat
-    assert thermostat.state == HVAC_MODE_HEAT
+    assert thermostat.state == HVACMode.HEAT
     assert thermostat.attributes[ATTR_PRESET_MODE] == "Clock"
     assert thermostat.attributes["boiler_indicator"] == "CH"
     assert thermostat.attributes["last_update"] == "2021-12-28T21:43:25+00:00 Tu"
@@ -72,7 +72,7 @@ async def test_climate_set_mode(hass: HomeAssistant, nefit_wrapper):
 
     thermostat = hass.states.get("climate.nefit")
     assert thermostat
-    assert thermostat.state == HVAC_MODE_HEAT
+    assert thermostat.state == HVACMode.HEAT
     assert thermostat.attributes[ATTR_PRESET_MODE] == "Manual"
 
     await hass.services.async_call(
@@ -88,5 +88,5 @@ async def test_climate_set_mode(hass: HomeAssistant, nefit_wrapper):
 
     thermostat = hass.states.get("climate.nefit")
     assert thermostat
-    assert thermostat.state == HVAC_MODE_HEAT
+    assert thermostat.state == HVACMode.HEAT
     assert thermostat.attributes[ATTR_PRESET_MODE] == "Clock"
