@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = {}
 
     credentials = dict(entry.data)
-    client = await hass.async_add_executor_job(NefitEasy, hass, credentials)
+    client = NefitEasy(hass, credentials)
 
     await client.connect()
     if client.connected_state == STATE_CONNECTION_VERIFIED:
