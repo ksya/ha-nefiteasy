@@ -13,5 +13,5 @@
   "requirements": [
     "aionefit-updated==0.16"
   ],  
-  "version": "0.4.5"
+  "version": "0.4.5b0"
 }
