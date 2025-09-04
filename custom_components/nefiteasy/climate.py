@@ -48,10 +48,13 @@ async def async_setup_entry(
     entities = []
 
     client = hass.data[DOMAIN][config_entry.entry_id]["client"]
+    climate = NefitThermostat(client, config_entry.data)
 
-    entities.append(NefitThermostat(client, config_entry.data))
+    entities.append(climate)
 
     async_add_entities(entities, update_before_add=True)
+
+    hass.data[DOMAIN][config_entry.entry_id]["climate"] = climate
 
 
 class NefitThermostat(CoordinatorEntity, ClimateEntity):
