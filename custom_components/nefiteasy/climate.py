@@ -26,6 +26,7 @@ from .const import (
     CONF_SERIAL,
     CONF_TEMP_STEP,
     DOMAIN,
+    ENDPOPINT_UI_STATUS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -169,7 +170,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         )
         self._client.nefit.xmppclient.message_event.clear()
 
-        self._client.nefit.get("/ecus/rrc/uiStatus")
+        self._client.nefit.get(ENDPOPINT_UI_STATUS)
         await self._client.update_ui_status_later(2)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -182,4 +183,4 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         )
         self._client.nefit.xmppclient.message_event.clear()
 
-        self._client.nefit.get("/ecus/rrc/uiStatus")
+        self._client.nefit.get(ENDPOPINT_UI_STATUS)

@@ -37,6 +37,9 @@ STATE_ERROR_AUTH = "authentication_failed"
 AUTH_ERROR_PASSWORD = "auth_error_password"
 AUTH_ERROR_CREDENTIALS = "auth_error_credentials"
 
+ENDPOPINT_HOLIDAY_MODE_BASE = "/heatingCircuits/hc1/holidayMode"
+ENDPOPINT_UI_STATUS = "/ecus/rrc/uiStatus"
+
 name = "name"
 url = "url"
 unit = "unit"
@@ -140,7 +143,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
     NefitSwitchEntityDescription(
         key="holiday_mode",
         name="Holiday mode",
-        url="/heatingCircuits/hc1/holidayMode/status",
+        url=ENDPOPINT_HOLIDAY_MODE_BASE + "/activated",
         short="HMD",
         icon="mdi:briefcase-outline",
         entity_registry_enabled_default=False,
