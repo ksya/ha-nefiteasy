@@ -25,7 +25,7 @@ from .const import (
     STATE_ERROR_AUTH,
     STATE_INIT,
     short,
-    ENDPOPINT_UI_STATUS,
+    ENDPOINT_UI_STATUS,
 )
 from .models import NefitEntityDescription
 
@@ -230,7 +230,7 @@ class NefitEasy(DataUpdateCoordinator):
     async def parse_message(self, data: dict[str, Any]) -> None:
         """Message received callback function for the XMPP client."""
         if (
-            data["id"] == ENDPOPINT_UI_STATUS
+            data["id"] == ENDPOINT_UI_STATUS
             and self.connected_state == STATE_CONNECTION_VERIFIED
         ):
             self._data["temp_setpoint"] = float(data["value"]["TSP"])  # for climate
@@ -276,7 +276,7 @@ class NefitEasy(DataUpdateCoordinator):
                 raise UpdateFailed("Nefit easy not connected!")
 
         async with self._lock:
-            _url = ENDPOPINT_UI_STATUS
+            _url = ENDPOINT_UI_STATUS
             await self._async_get_url(_url)
 
             for _url in self._urls:
@@ -300,7 +300,7 @@ class NefitEasy(DataUpdateCoordinator):
 
     async def update_ui_status_later(self, delay: float) -> None:
         """Force update of uiStatus after delay."""
-        self.hass.loop.call_later(delay, self.nefit.get, ENDPOPINT_UI_STATUS)
+        self.hass.loop.call_later(delay, self.nefit.get, ENDPOINT_UI_STATUS)
 
     async def _async_get_url(self, url: str) -> None:
         self._event.clear()

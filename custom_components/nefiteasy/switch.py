@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import NefitEasy
-from .const import DOMAIN, SWITCHES, ENDPOPINT_HOLIDAY_MODE_BASE, ENDPOPINT_UI_STATUS
+from .const import DOMAIN, SWITCHES, ENDPOINT_HOLIDAY_MODE_BASE, ENDPOINT_UI_STATUS
 from .models import NefitSwitchEntityDescription
 from .nefit_entity import NefitEntity
 
@@ -195,8 +195,8 @@ class NefitHolidayMode(NefitSwitch):
                 self.climate_clock_preset,
             )
 
-        holiday_start_ep = ENDPOPINT_HOLIDAY_MODE_BASE + "/start"
-        holiday_end_ep = ENDPOPINT_HOLIDAY_MODE_BASE + "/end"
+        holiday_start_ep = ENDPOINT_HOLIDAY_MODE_BASE + "/start"
+        holiday_end_ep = ENDPOINT_HOLIDAY_MODE_BASE + "/end"
         holiday_start_time = datetime.now().strftime("%Y-%m-%dT00:00:00")
 
         # Add 6 months
@@ -228,7 +228,7 @@ class NefitHolidayMode(NefitSwitch):
 
         await super().async_turn_on(**kwargs)
 
-        self._client.nefit.get(ENDPOPINT_UI_STATUS)
+        self._client.nefit.get(ENDPOINT_UI_STATUS)
         await self._client.update_ui_status_later(2)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -261,5 +261,5 @@ class NefitHolidayMode(NefitSwitch):
 
             self.climate_saved_setpoint = None
 
-        self._client.nefit.get(ENDPOPINT_UI_STATUS)
+        self._client.nefit.get(ENDPOINT_UI_STATUS)
         await self._client.update_ui_status_later(2)
