@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import NefitEasy
-from .const import DOMAIN, SWITCHES, ENDPOINT_HOLIDAY_MODE_BASE, ENDPOINT_UI_STATUS
+from .const import DOMAIN, ENDPOINT_HOLIDAY_MODE_BASE, ENDPOINT_UI_STATUS, SWITCHES
 from .models import NefitSwitchEntityDescription
 from .nefit_entity import NefitEntity
 
