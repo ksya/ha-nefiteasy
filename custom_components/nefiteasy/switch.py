@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta
 import logging
 from types import MappingProxyType
 from typing import Any
-from datetime import datetime, timedelta
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry

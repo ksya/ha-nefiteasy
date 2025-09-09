@@ -3,12 +3,12 @@ import asyncio
 from datetime import timedelta
 
 from freezegun.api import FrozenDateTimeFactory
+from homeassistant.components.climate.const import ATTR_PRESET_MODE
 from homeassistant.components.switch import (
     DOMAIN as SWITCH_DOMAIN,
     SERVICE_TURN_OFF,
     SERVICE_TURN_ON,
 )
-from homeassistant.components.climate.const import ATTR_PRESET_MODE
 from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
@@ -103,13 +103,14 @@ async def test_switch_states(
     assert state
     assert state.state == "off"
 
+
 async def test_holiday_switch_turn_on_off(
     hass: HomeAssistant, nefit_switch_wrapper, nefit_wrapper
 ):
     """Test states of holiday switch."""
     thermostat = hass.states.get("climate.nefit")
     assert thermostat
- 
+
     saved_preset = thermostat.attributes[ATTR_PRESET_MODE]
     saved_temp = thermostat.attributes[ATTR_TEMPERATURE]
 
@@ -130,7 +131,7 @@ async def test_holiday_switch_turn_on_off(
 
     assert thermostat.attributes[ATTR_PRESET_MODE] == "Clock"
 
-    await asyncio.sleep( 3 )
+    await asyncio.sleep(3)
 
     await hass.services.async_call(
         SWITCH_DOMAIN,

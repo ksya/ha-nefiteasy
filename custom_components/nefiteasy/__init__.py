@@ -20,12 +20,12 @@ from .const import (
     CONF_PASSWORD,
     CONF_SERIAL,
     DOMAIN,
+    ENDPOINT_UI_STATUS,
     STATE_CONNECTED,
     STATE_CONNECTION_VERIFIED,
     STATE_ERROR_AUTH,
     STATE_INIT,
     short,
-    ENDPOINT_UI_STATUS,
 )
 from .models import NefitEntityDescription
 
