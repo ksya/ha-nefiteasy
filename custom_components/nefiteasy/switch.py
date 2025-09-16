@@ -195,7 +195,7 @@ class NefitHolidayMode(NefitSwitch):
                 self.climate_clock_preset,
             )
 
-        holiday_start_ep = ENDPOINT_HOLIDAY_MODE_BASE + "/start"
+        holiday_start_ep = f"{ENDPOINT_HOLIDAY_MODE_BASE}/start"
         holiday_end_ep = ENDPOINT_HOLIDAY_MODE_BASE + "/end"
         holiday_start_time = datetime.now().strftime("%Y-%m-%dT00:00:00")
 
