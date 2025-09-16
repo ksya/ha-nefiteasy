@@ -40,6 +40,9 @@ AUTH_ERROR_CREDENTIALS = "auth_error_credentials"
 ENDPOINT_HOLIDAY_MODE_BASE = "/heatingCircuits/hc1/holidayMode"
 ENDPOINT_UI_STATUS = "/ecus/rrc/uiStatus"
 
+CLIMATE_PRESET_MANUAL = "manual"
+CLIMATE_PRESET_CLOCK = "clock"
+
 name = "name"
 url = "url"
 unit = "unit"

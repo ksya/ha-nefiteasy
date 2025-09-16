@@ -20,6 +20,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import NefitEasy
 from .const import (
+    CLIMATE_PRESET_CLOCK,
+    CLIMATE_PRESET_MANUAL,
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
     CONF_NAME,
@@ -133,7 +135,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         """Return the current preset mode."""
-        if self.coordinator.data.get("user_mode") == "clock":
+        if self.coordinator.data.get("user_mode") == CLIMATE_PRESET_CLOCK:
             return OPERATION_CLOCK
 
         return OPERATION_MANUAL
@@ -160,9 +162,9 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         """Set new target operation mode."""
         _LOGGER.debug("set_preset_mode called mode=%s", preset_mode)
         if preset_mode == OPERATION_CLOCK:
-            new_mode = "clock"
+            new_mode = CLIMATE_PRESET_CLOCK
         else:
-            new_mode = "manual"
+            new_mode = CLIMATE_PRESET_MANUAL
 
         self._client.nefit.set_usermode(new_mode)
         await asyncio.wait_for(

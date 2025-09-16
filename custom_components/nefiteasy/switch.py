@@ -13,7 +13,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import NefitEasy
-from .const import DOMAIN, ENDPOINT_HOLIDAY_MODE_BASE, ENDPOINT_UI_STATUS, SWITCHES
+from .const import (
+    CLIMATE_PRESET_CLOCK,
+    DOMAIN,
+    ENDPOINT_HOLIDAY_MODE_BASE,
+    ENDPOINT_UI_STATUS,
+    SWITCHES,
+)
 from .models import NefitSwitchEntityDescription
 from .nefit_entity import NefitEntity
 
@@ -143,10 +149,10 @@ class NefitHotWater(NefitSwitch):
         """Get end point."""
         endpoint = (
             "dhwOperationClockMode"
-            if self.coordinator.data.get("user_mode") == "clock"
+            if self.coordinator.data.get("user_mode") == CLIMATE_PRESET_CLOCK
             else "dhwOperationManualMode"
         )
-        return "/dhwCircuits/dhwA/" + endpoint
+        return f"/dhwCircuits/dhwA/{endpoint}"
 
 
 class NefitHolidayMode(NefitSwitch):
@@ -157,7 +163,6 @@ class NefitHolidayMode(NefitSwitch):
 
     climate_saved_preset = None
     climate_saved_setpoint = None
-    climate_clock_preset = "clock"
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set new target operation mode."""
@@ -174,25 +179,25 @@ class NefitHolidayMode(NefitSwitch):
 
         # Save and current preset mode and change it to Clock
         self.climate_saved_preset = (
-            self._client._data["user_mode"]
-            if self._client._data["user_mode"] != self.climate_clock_preset
+            self.coordinator.data.get("user_mode")
+            if self.coordinator.data.get("user_mode") != CLIMATE_PRESET_CLOCK
             else None
         )
-        self.climate_saved_setpoint = self._client._data["temp_setpoint"]
+        self.climate_saved_setpoint = self.coordinator.data.get("temp_setpoint")
 
         if self.climate_saved_preset is not None:
             _LOGGER.debug(
                 "Forcing thermostat preset mode to %s, previous mode %s, previous setpoint %s.",
-                self.climate_clock_preset,
+                CLIMATE_PRESET_CLOCK,
                 self.climate_saved_preset,
                 self.climate_saved_setpoint,
             )
 
-            await self.async_set_preset_mode(self.climate_clock_preset)
+            await self.async_set_preset_mode(CLIMATE_PRESET_CLOCK)
 
             _LOGGER.info(
                 "Thermostat preset mode set to %s during Holiday mode operation.",
-                self.climate_clock_preset,
+                CLIMATE_PRESET_CLOCK,
             )
 
         holiday_start_ep = f"{ENDPOINT_HOLIDAY_MODE_BASE}/start"
@@ -219,12 +224,6 @@ class NefitHolidayMode(NefitSwitch):
         )
 
         self._client.nefit.put_value(holiday_start_ep, holiday_start_time)
-
-        _LOGGER.info(
-            "Holiday mode starts from %s, and until %s.",
-            holiday_start_time,
-            holiday_end_time,
-        )
 
         await super().async_turn_on(**kwargs)
 
