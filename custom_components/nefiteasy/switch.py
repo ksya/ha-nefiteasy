@@ -15,6 +15,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import NefitEasy
 from .const import (
     CLIMATE_PRESET_CLOCK,
+    CLIMATE_PROPERTY_NAME_PRESET,
+    CLIMATE_PROPERTY_NAME_SETPOINT,
     DOMAIN,
     ENDPOINT_HOLIDAY_MODE_BASE,
     ENDPOINT_UI_STATUS,
@@ -149,7 +151,8 @@ class NefitHotWater(NefitSwitch):
         """Get end point."""
         endpoint = (
             "dhwOperationClockMode"
-            if self.coordinator.data.get("user_mode") == CLIMATE_PRESET_CLOCK
+            if self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            == CLIMATE_PRESET_CLOCK
             else "dhwOperationManualMode"
         )
         return f"/dhwCircuits/dhwA/{endpoint}"
@@ -179,11 +182,14 @@ class NefitHolidayMode(NefitSwitch):
 
         # Save and current preset mode and change it to Clock
         self.climate_saved_preset = (
-            self.coordinator.data.get("user_mode")
-            if self.coordinator.data.get("user_mode") != CLIMATE_PRESET_CLOCK
+            self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            if self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            != CLIMATE_PRESET_CLOCK
             else None
         )
-        self.climate_saved_setpoint = self.coordinator.data.get("temp_setpoint")
+        self.climate_saved_setpoint = self.coordinator.data.get(
+            CLIMATE_PROPERTY_NAME_SETPOINT
+        )
 
         if self.climate_saved_preset is not None:
             _LOGGER.debug(

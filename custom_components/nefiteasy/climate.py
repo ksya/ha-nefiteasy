@@ -22,6 +22,8 @@ from . import NefitEasy
 from .const import (
     CLIMATE_PRESET_CLOCK,
     CLIMATE_PRESET_MANUAL,
+    CLIMATE_PROPERTY_NAME_PRESET,
+    CLIMATE_PROPERTY_NAME_SETPOINT,
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
     CONF_NAME,
@@ -105,7 +107,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def target_temperature(self) -> float:
         """Return target temperature."""
-        return float(self.coordinator.data.get("temp_setpoint"))
+        return float(self.coordinator.data.get(CLIMATE_PROPERTY_NAME_SETPOINT))
 
     @property
     def hvac_modes(self) -> list[str]:
@@ -135,7 +137,10 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         """Return the current preset mode."""
-        if self.coordinator.data.get("user_mode") == CLIMATE_PRESET_CLOCK:
+        if (
+            self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            == CLIMATE_PRESET_CLOCK
+        ):
             return OPERATION_CLOCK
 
         return OPERATION_MANUAL

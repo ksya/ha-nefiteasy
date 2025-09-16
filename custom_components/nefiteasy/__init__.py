@@ -16,6 +16,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 import slixmpp
 
 from .const import (
+    CLIMATE_PROPERTY_NAME_PRESET,
+    CLIMATE_PROPERTY_NAME_SETPOINT,
     CONF_ACCESSKEY,
     CONF_PASSWORD,
     CONF_SERIAL,
@@ -233,11 +235,15 @@ class NefitEasy(DataUpdateCoordinator):
             data["id"] == ENDPOINT_UI_STATUS
             and self.connected_state == STATE_CONNECTION_VERIFIED
         ):
-            self._data["temp_setpoint"] = float(data["value"]["TSP"])  # for climate
+            self._data[CLIMATE_PROPERTY_NAME_SETPOINT] = float(
+                data["value"]["TSP"]
+            )  # for climate
             self._data["inhouse_temperature"] = float(
                 data["value"]["IHT"]
             )  # for climate
-            self._data["user_mode"] = data["value"]["UMD"]  # for climate
+            self._data[CLIMATE_PROPERTY_NAME_PRESET] = data["value"][
+                "UMD"
+            ]  # for climate
             self._data["boiler_indicator"] = data["value"]["BAI"]  # for climate
             self._data["last_update"] = data["value"]["CTD"]
 
