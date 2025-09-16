@@ -16,10 +16,13 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 import slixmpp
 
 from .const import (
+    CLIMATE_PROPERTY_NAME_PRESET,
+    CLIMATE_PROPERTY_NAME_SETPOINT,
     CONF_ACCESSKEY,
     CONF_PASSWORD,
     CONF_SERIAL,
     DOMAIN,
+    ENDPOINT_UI_STATUS,
     STATE_CONNECTED,
     STATE_CONNECTION_VERIFIED,
     STATE_ERROR_AUTH,
@@ -229,14 +232,18 @@ class NefitEasy(DataUpdateCoordinator):
     async def parse_message(self, data: dict[str, Any]) -> None:
         """Message received callback function for the XMPP client."""
         if (
-            data["id"] == "/ecus/rrc/uiStatus"
+            data["id"] == ENDPOINT_UI_STATUS
             and self.connected_state == STATE_CONNECTION_VERIFIED
         ):
-            self._data["temp_setpoint"] = float(data["value"]["TSP"])  # for climate
+            self._data[CLIMATE_PROPERTY_NAME_SETPOINT] = float(
+                data["value"]["TSP"]
+            )  # for climate
             self._data["inhouse_temperature"] = float(
                 data["value"]["IHT"]
             )  # for climate
-            self._data["user_mode"] = data["value"]["UMD"]  # for climate
+            self._data[CLIMATE_PROPERTY_NAME_PRESET] = data["value"][
+                "UMD"
+            ]  # for climate
             self._data["boiler_indicator"] = data["value"]["BAI"]  # for climate
             self._data["last_update"] = data["value"]["CTD"]
 
@@ -275,7 +282,7 @@ class NefitEasy(DataUpdateCoordinator):
                 raise UpdateFailed("Nefit easy not connected!")
 
         async with self._lock:
-            _url = "/ecus/rrc/uiStatus"
+            _url = ENDPOINT_UI_STATUS
             await self._async_get_url(_url)
 
             for _url in self._urls:
@@ -299,7 +306,7 @@ class NefitEasy(DataUpdateCoordinator):
 
     async def update_ui_status_later(self, delay: float) -> None:
         """Force update of uiStatus after delay."""
-        self.hass.loop.call_later(delay, self.nefit.get, "/ecus/rrc/uiStatus")
+        self.hass.loop.call_later(delay, self.nefit.get, ENDPOINT_UI_STATUS)
 
     async def _async_get_url(self, url: str) -> None:
         self._event.clear()

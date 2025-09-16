@@ -1,4 +1,11 @@
 {
+    "/heatingCircuits/hc1/holidayMode/activated": {
+        "id": "/heatingCircuits/hc1/holidayMode/activated",
+        "type": "stringValue",
+        "recordable": 0,
+        "writeable": 1,
+        "value": "off"
+    },
     "/heatingCircuits/hc1/holidayMode/status": {
         "id": "/heatingCircuits/hc1/holidayMode/status",
         "type": "stringValue",

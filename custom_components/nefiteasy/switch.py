@@ -1,6 +1,8 @@
 """Support for Bosch home thermostats."""
 from __future__ import annotations
 
+import asyncio
+from datetime import datetime, timedelta
 import logging
 from types import MappingProxyType
 from typing import Any
@@ -11,7 +13,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import NefitEasy
-from .const import DOMAIN, SWITCHES
+from .const import (
+    CLIMATE_PRESET_CLOCK,
+    CLIMATE_PROPERTY_NAME_PRESET,
+    CLIMATE_PROPERTY_NAME_SETPOINT,
+    DOMAIN,
+    ENDPOINT_HOLIDAY_MODE_BASE,
+    ENDPOINT_UI_STATUS,
+    SWITCHES,
+)
 from .models import NefitSwitchEntityDescription
 from .nefit_entity import NefitEntity
 
@@ -32,6 +42,8 @@ async def async_setup_entry(
     for description in SWITCHES:
         if description.key == "hot_water":
             entities.append(NefitHotWater(description, client, data))
+        elif description.key == "holiday_mode":
+            entities.append(NefitHolidayMode(description, client, data))
         elif description.key == "lockui":
             entities.append(NefitSwitch(description, client, data, "true", "false"))
         elif description.key == "weather_dependent":
@@ -139,7 +151,120 @@ class NefitHotWater(NefitSwitch):
         """Get end point."""
         endpoint = (
             "dhwOperationClockMode"
-            if self.coordinator.data.get("user_mode") == "clock"
+            if self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            == CLIMATE_PRESET_CLOCK
             else "dhwOperationManualMode"
         )
-        return "/dhwCircuits/dhwA/" + endpoint
+        return f"/dhwCircuits/dhwA/{endpoint}"
+
+
+class NefitHolidayMode(NefitSwitch):
+    """Class for nefit holiday mode entity.
+
+    Note it only works if the thermostat preset is set to Clock
+    """
+
+    climate_saved_preset = None
+    climate_saved_setpoint = None
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set new target operation mode."""
+        _LOGGER.debug("Holiday mode set_preset_mode called mode=%s", preset_mode)
+
+        self._client.nefit.set_usermode(preset_mode)
+        await asyncio.wait_for(
+            self._client.nefit.xmppclient.message_event.wait(), timeout=9
+        )
+        self._client.nefit.xmppclient.message_event.clear()
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+
+        # Save and current preset mode and change it to Clock
+        self.climate_saved_preset = (
+            self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            if self.coordinator.data.get(CLIMATE_PROPERTY_NAME_PRESET)
+            != CLIMATE_PRESET_CLOCK
+            else None
+        )
+        self.climate_saved_setpoint = self.coordinator.data.get(
+            CLIMATE_PROPERTY_NAME_SETPOINT
+        )
+
+        if self.climate_saved_preset is not None:
+            _LOGGER.debug(
+                "Forcing thermostat preset mode to %s, previous mode %s, previous setpoint %s.",
+                CLIMATE_PRESET_CLOCK,
+                self.climate_saved_preset,
+                self.climate_saved_setpoint,
+            )
+
+            await self.async_set_preset_mode(CLIMATE_PRESET_CLOCK)
+
+            _LOGGER.info(
+                "Thermostat preset mode set to %s during Holiday mode operation.",
+                CLIMATE_PRESET_CLOCK,
+            )
+
+        holiday_start_ep = f"{ENDPOINT_HOLIDAY_MODE_BASE}/start"
+        holiday_end_ep = f"{ENDPOINT_HOLIDAY_MODE_BASE}/end"
+        holiday_start_time = datetime.now().strftime("%Y-%m-%dT00:00:00")
+
+        # Add 6 months
+        holiday_end_time = (datetime.now() + timedelta(days=180)).strftime(
+            "%Y-%m-%dT00:00:00"
+        )
+
+        _LOGGER.debug(
+            "Setting holiday end date to %s, endpoint=%s.",
+            holiday_end_time,
+            holiday_end_ep,
+        )
+
+        self._client.nefit.put_value(holiday_end_ep, holiday_end_time)
+
+        _LOGGER.debug(
+            "Setting holiday start date to %s, endpoint=%s.",
+            holiday_start_time,
+            holiday_start_ep,
+        )
+
+        self._client.nefit.put_value(holiday_start_ep, holiday_start_time)
+
+        await super().async_turn_on(**kwargs)
+
+        self._client.nefit.get(ENDPOINT_UI_STATUS)
+        await self._client.update_ui_status_later(2)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+
+        await super().async_turn_off(**kwargs)
+
+        # Setting the preset mode back to original
+        if self.climate_saved_preset is not None:
+            await self.async_set_preset_mode(self.climate_saved_preset)
+
+            _LOGGER.info(
+                "Thermostat preset restored to %s after Holiday mode operation was cancelled.",
+                self.climate_saved_preset,
+            )
+
+            self.climate_saved_preset = None
+
+        if self.climate_saved_setpoint is not None:
+            self._client.nefit.set_temperature(self.climate_saved_setpoint)
+            await asyncio.wait_for(
+                self._client.nefit.xmppclient.message_event.wait(), timeout=9
+            )
+            self._client.nefit.xmppclient.message_event.clear()
+
+            _LOGGER.info(
+                "Thermostat setpoint restored to %s after Holiday mode operation was cancelled.",
+                self.climate_saved_setpoint,
+            )
+
+            self.climate_saved_setpoint = None
+
+        self._client.nefit.get(ENDPOINT_UI_STATUS)
+        await self._client.update_ui_status_later(2)
