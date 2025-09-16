@@ -143,7 +143,7 @@ SWITCHES: tuple[NefitSwitchEntityDescription, ...] = (
     NefitSwitchEntityDescription(
         key="holiday_mode",
         name="Holiday mode",
-        url=ENDPOINT_HOLIDAY_MODE_BASE + "/activated",
+        url=f"{ENDPOINT_HOLIDAY_MODE_BASE}/activated",
         short="HMD",
         icon="mdi:briefcase-outline",
         entity_registry_enabled_default=False,
