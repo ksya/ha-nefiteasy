@@ -1,2 +1,2 @@
-aionefit-updated==0.16
 slixmpp=1.13.2
+aionefit-updated==0.16
