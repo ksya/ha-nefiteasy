@@ -11,8 +11,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/ksya/ha-nefiteasy/issues",
   "requirements": [
-    "aionefit-updated==0.16"
-    "slixmpp=1.13.2"
+    "aionefit-updated==0.17"
   ],  
   "version": "0.4.6"
 }
