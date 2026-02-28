@@ -1,5 +1,4 @@
-slixmpp=1.13.2
-aionefit-updated==0.16
+aionefit-updated==0.17
 pylint==3.3.8
 pytest
 pytest-cov
