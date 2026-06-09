@@ -313,6 +313,6 @@ class NefitEasy(DataUpdateCoordinator):
         try:
             await asyncio.wait_for(self._event.wait(), timeout=9)
         except asyncio.TimeoutError:
-            self._request = ""
             raise
-        self._request = ""
+        finally:
+            self._request = ""
