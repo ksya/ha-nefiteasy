@@ -1,4 +1,5 @@
 """Support for first generation Bosch smart home thermostats: Nefit Easy, Junkers CT100 etc."""
+
 from __future__ import annotations
 
 import asyncio
@@ -226,6 +227,10 @@ class NefitEasy(DataUpdateCoordinator):
             self.connected_state = STATE_INIT
             self.expected_end = False
 
+            # Schedule an immediate reconnect rather than waiting up to 60s
+            # for the next scheduled poll cycle.
+            self.hass.async_create_task(self.async_refresh())
+
     async def parse_message(self, data: dict[str, Any]) -> None:
         """Message received callback function for the XMPP client."""
         if (
@@ -305,5 +310,9 @@ class NefitEasy(DataUpdateCoordinator):
         self._event.clear()
         self._request = url
         self.nefit.get(url)
-        await asyncio.wait_for(self._event.wait(), timeout=9)
+        try:
+            await asyncio.wait_for(self._event.wait(), timeout=9)
+        except asyncio.TimeoutError:
+            self._request = ""
+            raise
         self._request = ""
