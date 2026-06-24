@@ -1,13 +1,15 @@
 """Tests of the nefiteasy sensor integration."""
+import asyncio
 from datetime import timedelta
 
 from freezegun.api import FrozenDateTimeFactory
+from homeassistant.components.climate.const import ATTR_PRESET_MODE
 from homeassistant.components.switch import (
     DOMAIN as SWITCH_DOMAIN,
     SERVICE_TURN_OFF,
     SERVICE_TURN_ON,
 )
-from homeassistant.const import ATTR_ENTITY_ID
+from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
@@ -102,10 +104,19 @@ async def test_switch_states(
     assert state.state == "off"
 
 
-async def test_switch_turn_on_off(
+async def test_holiday_switch_turn_on_off(
     hass: HomeAssistant, nefit_switch_wrapper, nefit_wrapper
 ):
-    """Test states of switches."""
+    """Test states of holiday switch."""
+    thermostat = hass.states.get("climate.nefit")
+    assert thermostat
+
+    saved_preset = thermostat.attributes[ATTR_PRESET_MODE]
+    saved_temp = thermostat.attributes[ATTR_TEMPERATURE]
+
+    assert saved_preset
+    assert saved_temp
+
     await hass.services.async_call(
         SWITCH_DOMAIN,
         SERVICE_TURN_ON,
@@ -118,6 +129,31 @@ async def test_switch_turn_on_off(
     assert state
     assert state.state == "on"
 
+    assert thermostat.attributes[ATTR_PRESET_MODE] == "Clock"
+
+    await asyncio.sleep(3)
+
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_OFF,
+        {ATTR_ENTITY_ID: "switch.nefiteasy_123456789_holiday_mode"},
+        blocking=True,
+    )
+    await hass.async_block_till_done()
+
+    state = hass.states.get("switch.nefiteasy_123456789_holiday_mode")
+    assert state
+    assert state.state == "off"
+
+    # Check if previous preset was restored
+    assert thermostat.attributes[ATTR_PRESET_MODE] == saved_preset
+    assert thermostat.attributes[ATTR_TEMPERATURE] == saved_temp
+
+
+async def test_switch_turn_on_off(
+    hass: HomeAssistant, nefit_switch_wrapper, nefit_wrapper
+):
+    """Test states of all switches except the holiday switch."""
     await hass.services.async_call(
         SWITCH_DOMAIN,
         SERVICE_TURN_OFF,
