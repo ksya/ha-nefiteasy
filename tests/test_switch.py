@@ -18,39 +18,39 @@ async def test_disabled_switch_default(hass: HomeAssistant, nefit_wrapper):
     """Test disabled state of entity."""
     entity_registry = er.async_get(hass)
 
-    entry = entity_registry.async_get("switch.hot_water")
+    entry = entity_registry.async_get("switch.nefit_hot_water")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.holiday_mode")
+    entry = entity_registry.async_get("switch.nefit_holiday_mode")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.fireplace_mode")
+    entry = entity_registry.async_get("switch.nefit_fireplace_mode")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.today_as_sunday")
+    entry = entity_registry.async_get("switch.nefit_today_as_sunday")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.tomorrow_as_sunday")
+    entry = entity_registry.async_get("switch.nefit_tomorrow_as_sunday")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.preheating")
+    entry = entity_registry.async_get("switch.nefit_preheating")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.weather_dependent")
+    entry = entity_registry.async_get("switch.nefit_weather_dependent")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.lock_ui")
+    entry = entity_registry.async_get("switch.nefit_lock_ui")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("switch.shower_timer")
+    entry = entity_registry.async_get("switch.nefit_shower_timer")
     assert entry
     assert entry.disabled is True
 
@@ -143,14 +143,14 @@ async def test_presence_detection(
 
     entity_registry = er.async_get(hass)
 
-    entry = entity_registry.async_get("switch.presence_my_device")
+    entry = entity_registry.async_get("switch.nefit_presence_my_device")
     assert entry
 
     freezer.tick(timedelta(seconds=65))
     async_fire_time_changed(hass)
     await hass.async_block_till_done(wait_background_tasks=True)
 
-    state = hass.states.get("switch.presence_my_device")
+    state = hass.states.get("switch.nefit_presence_my_device")
     assert state
     assert state.state == "on"
 
@@ -162,6 +162,6 @@ async def test_presence_detection(
     async_fire_time_changed(hass)
     await hass.async_block_till_done(wait_background_tasks=True)
 
-    state = hass.states.get("switch.presence_my_device")
+    state = hass.states.get("switch.nefit_presence_my_device")
     assert state
     assert state.state == "off"

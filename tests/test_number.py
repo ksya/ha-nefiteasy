@@ -13,7 +13,7 @@ from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 async def test_disabled_number_default(hass: HomeAssistant, nefit_wrapper):
     """Test disabled state of entity."""
-    entity_id = "number.shower_timer_duration"
+    entity_id = "number.nefit_shower_timer_duration"
 
     entity_registry = er.async_get(hass)
 

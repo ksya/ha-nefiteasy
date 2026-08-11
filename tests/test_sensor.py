@@ -12,11 +12,11 @@ async def test_disabled_sensor_default(hass: HomeAssistant, nefit_wrapper):
     """Test disabled state of entity."""
     entity_registry = er.async_get(hass)
 
-    entry = entity_registry.async_get("sensor.hot_water_operation")
+    entry = entity_registry.async_get("sensor.nefit_hot_water_operation")
     assert entry
     assert entry.disabled is True
 
-    entry = entity_registry.async_get("sensor.inhouse_temperature")
+    entry = entity_registry.async_get("sensor.nefit_inhouse_temperature")
     assert entry
     assert entry.disabled is True
 
@@ -29,27 +29,27 @@ async def test_sensor_states(
     async_fire_time_changed(hass)
     await hass.async_block_till_done(wait_background_tasks=True)
 
-    state = hass.states.get("sensor.year_total")
+    state = hass.states.get("sensor.nefit_year_total")
     assert state
     assert state.state == "1227.1"
 
-    state = hass.states.get("sensor.status")
+    state = hass.states.get("sensor.nefit_status")
     assert state
     assert state.state == "0E: system waiting"
 
-    state = hass.states.get("sensor.supply_temperature")
+    state = hass.states.get("sensor.nefit_supply_temperature")
     assert state
     assert state.state == "29.1"
 
-    state = hass.states.get("sensor.outdoor_temperature")
+    state = hass.states.get("sensor.nefit_outdoor_temperature")
     assert state
     assert state.state == "9.0"
 
-    state = hass.states.get("sensor.system_pressure")
+    state = hass.states.get("sensor.nefit_system_pressure")
     assert state
     assert state.state == "1.5"
 
-    state = hass.states.get("sensor.system_pressure")
+    state = hass.states.get("sensor.nefit_system_pressure")
     assert state
     assert state.state == "1.5"
 

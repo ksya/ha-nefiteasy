@@ -7,7 +7,7 @@ from homeassistant.components.select import (
     DOMAIN as SELECT_DOMAIN,
     SERVICE_SELECT_OPTION,
 )
-from homeassistant.components.select.const import ATTR_OPTION
+from homeassistant.components.select import ATTR_OPTION
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
@@ -16,7 +16,7 @@ from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 async def test_disabled_select_default(hass: HomeAssistant, nefit_wrapper):
     """Test disabled state of entity."""
-    entity_id = "select.active_program"
+    entity_id = "select.nefit_active_program"
 
     entity_registry = er.async_get(hass)
 
