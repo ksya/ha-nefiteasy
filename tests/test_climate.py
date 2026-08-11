@@ -1,4 +1,5 @@
 """Tests of the nefiteasy climate integration."""
+
 from homeassistant.components.climate import (
     DOMAIN as CLIMATE_DOMAIN,
     SERVICE_SET_PRESET_MODE,

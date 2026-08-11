@@ -1,4 +1,5 @@
 """Config flow for Nefit Easy Bosch Thermostat integration."""
+
 from __future__ import annotations
 
 import asyncio

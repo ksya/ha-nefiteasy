@@ -1,4 +1,5 @@
 """Test configuration of the nefiteasy integration."""
+
 import asyncio
 import json
 from unittest.mock import MagicMock, patch

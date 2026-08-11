@@ -1,4 +1,5 @@
 """Tests of the initialization of the nefiteasy integration."""
+
 import asyncio
 from unittest.mock import patch
 

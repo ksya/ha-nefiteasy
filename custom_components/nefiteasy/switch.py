@@ -1,4 +1,5 @@
 """Support for Bosch home thermostats."""
+
 from __future__ import annotations
 
 import logging

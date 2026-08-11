@@ -1,4 +1,5 @@
 """Constants for the nefiteasy component."""
+
 from __future__ import annotations
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
@@ -125,6 +126,55 @@ SENSORS: tuple[NefitSensorEntityDescription, ...] = (
         unit=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="firmware_version",
+        name="Firmware version",
+        url="/gateway/versionFirmware",
+        icon="mdi:information-outline",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="hardware_version",
+        name="Hardware revision",
+        url="/gateway/versionHardware",
+        icon="mdi:chip",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="refill_needed",
+        name="Refill needed",
+        url="/ecus/rrc/pm/refillneeded/status",
+        icon="mdi:water-alert",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="system_leaking",
+        name="System leak detected",
+        url="/ecus/rrc/pm/systemleaking/status",
+        icon="mdi:pipe-leak",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="ignition_status",
+        name="Ignition status",
+        url="/ecus/rrc/pm/ignition/status",
+        icon="mdi:fire-alert",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="closing_valve_status",
+        name="Gas valve status",
+        url="/ecus/rrc/pm/closingvalve/status",
+        icon="mdi:valve-closed",
+        entity_registry_enabled_default=False,
+    ),
+    NefitSensorEntityDescription(
+        key="maintenance_request",
+        name="Boiler maintenance required",
+        url="/system/appliance/boilermaintenancerequest",
+        icon="mdi:wrench-clock",
         entity_registry_enabled_default=False,
     ),
 )

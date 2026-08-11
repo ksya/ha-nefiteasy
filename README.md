@@ -68,6 +68,13 @@ Some entities are disabled by default, if needed they can be enabled. Entities t
 | system_pressure | System pressure | Bar | System water pressure | &#x2714; |
 | target_temperature | Target temperature | °C | Target temperature | &#x274C; |
 | year_total | Year total | m<sup>3</sup> | Volume of gas consumed since Jan 1<sup>st</sup> | &#x2714; |
+| firmware_version | Firmware version | | Firmware version installed on thermostat | &#x274C; |
+| hardware_version | Hardware revision | | Hardware revision of thermostat unit | &#x274C; |
+| refill_needed | Refill needed | | Alert when boiler water pressure drops low and needs refilling | &#x274C; |
+| system_leaking | System leak detected | | Leak detection alert for heating system pressure drops | &#x274C; |
+| ignition_status | Ignition status | | Burner ignition failure warning indicator | &#x274C; |
+| closing_valve_status | Gas valve status | | Gas valve / closing valve fault warning indicator | &#x274C; |
+| maintenance_request | Boiler maintenance required | | Boiler maintenance or service required indicator | &#x274C; |
 
 #### Sensor values
 

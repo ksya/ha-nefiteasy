@@ -148,7 +148,7 @@ class NefitEasy(DataUpdateCoordinator):
                 try:
                     self.nefit.get("/gateway/brandID")
                 except slixmpp.xmlstream.xmlstream.NotConnectedError:
-                    self.connected_state == STATE_INIT
+                    self.connected_state = STATE_INIT
                     _LOGGER.debug("Set is connecting to false")
                     self.is_connecting = False
                     return
@@ -280,11 +280,18 @@ class NefitEasy(DataUpdateCoordinator):
                 raise UpdateFailed("Nefit easy not connected!")
 
         async with self._lock:
-            _url = "/ecus/rrc/uiStatus"
-            await self._async_get_url(_url)
-
-            for _url in self._urls:
+            try:
+                _url = "/ecus/rrc/uiStatus"
                 await self._async_get_url(_url)
+
+                for _url in self._urls:
+                    await self._async_get_url(_url)
+            except Exception as ex:
+                _LOGGER.warning(
+                    "Nefit Easy communication error, resetting connection state: %s", ex
+                )
+                self.connected_state = STATE_INIT
+                raise UpdateFailed(f"Error communicating with Nefit Easy: {ex}") from ex
 
         return self._data
 
