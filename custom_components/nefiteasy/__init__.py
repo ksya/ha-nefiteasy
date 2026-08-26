@@ -48,7 +48,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if client.connected_state == STATE_CONNECTION_VERIFIED:
         hass.data[DOMAIN][entry.entry_id]["client"] = client
     else:
-        raise ConfigEntryNotReady
+        raise ConfigEntryNotReady(
+            f"Unable to verify connection to {credentials[CONF_SERIAL]}, "
+            f"state: {client.connected_state}"
+        )
 
     await hass.config_entries.async_forward_entry_setups(entry, DOMAINS)
 
@@ -129,62 +132,64 @@ class NefitEasy(DataUpdateCoordinator):
         if not self.is_connecting:
             _LOGGER.debug("Set is connecting to true")
             self.is_connecting = True
-
-            # Events from a previous session may still be set; without
-            # clearing them the waits below would return instantly and
-            # verify against a dead transport. Clear BEFORE connecting
-            # so a genuine handshake can set them again afterwards.
-            self.nefit.xmppclient.connected_event.clear()
-            self.nefit.xmppclient.message_event.clear()
-            await self.nefit.connect()
-            _LOGGER.debug("Waiting for connected event.")
             try:
-                await asyncio.wait_for(
-                    self.nefit.xmppclient.connected_event.wait(), timeout=29.0
-                )
-            except asyncio.TimeoutError:
-                _LOGGER.debug("TimeoutError on waiting for connected event.")
-            except:  # noqa: E722 pylint: disable=bare-except
-                _LOGGER.debug("Unknown error.")
-            else:
-                _LOGGER.debug("Connected successfully.")
-                self.connected_state = STATE_CONNECTED
-
-            if self.connected_state == STATE_CONNECTED:
+                # Events from a previous session may still be set; without
+                # clearing them the waits below would return instantly and
+                # verify against a dead transport. Clear BEFORE connecting
+                # so a genuine handshake can set them again afterwards.
+                self.nefit.xmppclient.connected_event.clear()
+                self.nefit.xmppclient.message_event.clear()
+                await self.nefit.connect()
+                _LOGGER.debug("Waiting for connected event.")
                 try:
-                    self.nefit.get("/gateway/brandID")
-                except slixmpp.xmlstream.xmlstream.NotConnectedError:
-                    self.connected_state = STATE_INIT
-                    _LOGGER.debug("Set is connecting to false")
-                    self.is_connecting = False
-                    return
-
-                try:
-                    _LOGGER.debug("Wait for message event")
-
                     await asyncio.wait_for(
-                        self.nefit.xmppclient.message_event.wait(), timeout=29.0
+                        self.nefit.xmppclient.connected_event.wait(), timeout=29.0
                     )
                 except asyncio.TimeoutError:
-                    _LOGGER.debug(
-                        "Did not get a response in time for testing connection."
-                    )
-                except:  # noqa: E722 pylint: disable=bare-except
-                    _LOGGER.debug("No connection while testing connection.")
+                    _LOGGER.debug("TimeoutError on waiting for connected event.")
+                except asyncio.CancelledError:
+                    raise
+                except Exception as ex:
+                    _LOGGER.debug("Unknown error waiting for connected event: %r", ex)
                 else:
-                    _LOGGER.debug("Message event received")
+                    _LOGGER.debug("Connected successfully.")
+                    self.connected_state = STATE_CONNECTED
 
-                    self.nefit.xmppclient.message_event.clear()
+                if self.connected_state == STATE_CONNECTED:
+                    try:
+                        self.nefit.get("/gateway/brandID")
+                    except slixmpp.xmlstream.xmlstream.NotConnectedError:
+                        self.connected_state = STATE_INIT
+                        return
 
-                    # No exception and no auth error
-                    if self.connected_state == STATE_CONNECTED:
-                        self.connected_state = STATE_CONNECTION_VERIFIED
+                    try:
+                        _LOGGER.debug("Wait for message event")
 
-            if self.connected_state != STATE_CONNECTION_VERIFIED:
-                _LOGGER.debug("Successfully verified connection.")
+                        await asyncio.wait_for(
+                            self.nefit.xmppclient.message_event.wait(), timeout=29.0
+                        )
+                    except asyncio.TimeoutError:
+                        _LOGGER.debug(
+                            "Did not get a response in time for testing connection."
+                        )
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as ex:
+                        _LOGGER.debug("No connection while testing connection: %r", ex)
+                    else:
+                        _LOGGER.debug("Message event received")
 
-            _LOGGER.debug("Set is connecting to false")
-            self.is_connecting = False
+                        self.nefit.xmppclient.message_event.clear()
+
+                        # No exception and no auth error
+                        if self.connected_state == STATE_CONNECTED:
+                            self.connected_state = STATE_CONNECTION_VERIFIED
+
+                if self.connected_state == STATE_CONNECTION_VERIFIED:
+                    _LOGGER.debug("Successfully verified connection.")
+            finally:
+                _LOGGER.debug("Set is connecting to false")
+                self.is_connecting = False
         else:
             _LOGGER.debug("Connection procedure is already running.")
 
@@ -293,10 +298,15 @@ class NefitEasy(DataUpdateCoordinator):
                     await self._async_get_url(_url)
             except Exception as ex:
                 _LOGGER.warning(
-                    "Nefit Easy communication error, resetting connection state: %s", ex
+                    "Nefit Easy communication error on %s, resetting "
+                    "connection state: %r",
+                    _url,
+                    ex,
                 )
                 self.connected_state = STATE_INIT
-                raise UpdateFailed(f"Error communicating with Nefit Easy: {ex}") from ex
+                raise UpdateFailed(
+                    f"Error communicating with Nefit Easy on {_url}: {ex!r}"
+                ) from ex
 
         return self._data
 

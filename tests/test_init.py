@@ -138,3 +138,28 @@ async def test_duplicate_session_end_suppression(mock_class, hass: HomeAssistant
         # Duplicate unexpected disconnect arriving immediately after
         await coordinator.session_end_callback()
         assert mock_refresh.call_count == 1
+
+
+@patch("custom_components.nefiteasy.NefitCore")
+async def test_connect_cancellation_resets_is_connecting(
+    mock_class, hass: HomeAssistant
+):
+    """Test that cancellation during connect resets is_connecting."""
+    import pytest
+
+    from custom_components.nefiteasy import NefitEasy
+
+    client = ClientMock(mock_class)
+    mock_class.return_value = client
+
+    coordinator = NefitEasy(hass, entry_data)
+
+    async def cancelled_wait():
+        raise asyncio.CancelledError
+
+    client.xmppclient.connected_event.wait = cancelled_wait
+
+    with pytest.raises(asyncio.CancelledError):
+        await coordinator.connect()
+
+    assert not coordinator.is_connecting
