@@ -32,6 +32,21 @@ from .models import NefitEntityDescription
 _LOGGER = logging.getLogger(__name__)
 
 
+class _SuppressLegacyXmppWarning(logging.Filter):
+    """Hide slixmpp's 'Legacy XMPP 0.9 protocol detected.' warning.
+
+    The Bosch/Nefit XMPP server does not send a version attribute in its
+    stream header, so slixmpp logs this warning on every (re)connect. It is
+    harmless: slixmpp falls back to legacy handling and the connection works.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "Legacy XMPP 0.9 protocol detected" not in record.getMessage()
+
+
+logging.getLogger("slixmpp.basexmpp").addFilter(_SuppressLegacyXmppWarning())
+
+
 DOMAINS = ["climate", "select", "sensor", "switch", "number"]
 
 
