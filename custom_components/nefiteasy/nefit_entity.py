@@ -8,8 +8,8 @@ from typing import Any
 
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import NefitEasy
 from .const import CONF_NAME, CONF_SERIAL, DOMAIN
+from .coordinator import NefitEasy
 from .models import NefitEntityDescription
 
 _LOGGER = logging.getLogger(__name__)

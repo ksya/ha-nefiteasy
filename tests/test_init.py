@@ -20,7 +20,7 @@ entry_data = {
 }
 
 
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def test_load_unload_entry(mock_class, hass: HomeAssistant):
     """Validate that setup entry also configure the client."""
     client = ClientMock(mock_class)
@@ -41,7 +41,7 @@ async def test_load_unload_entry(mock_class, hass: HomeAssistant):
     assert config_entry.state == config_entries.ConfigEntryState.NOT_LOADED
 
 
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def test_setup_connection_fail_timeout(mock_class, hass: HomeAssistant):
     """Test setup connection with timeout failure."""
     client = ClientMock(mock_class)
@@ -62,7 +62,7 @@ async def test_setup_connection_fail_timeout(mock_class, hass: HomeAssistant):
     assert config_entry.state == config_entries.ConfigEntryState.SETUP_RETRY
 
 
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def test_setup_validation_fail_timeout(mock_class, hass: HomeAssistant):
     """Test setup with validation timeout."""
     client = ClientMock(mock_class)
@@ -83,7 +83,7 @@ async def test_setup_validation_fail_timeout(mock_class, hass: HomeAssistant):
     assert config_entry.state == config_entries.ConfigEntryState.SETUP_RETRY
 
 
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def test_connect_clears_stale_events(mock_class, hass: HomeAssistant):
     """Test that stale events from a previous session are cleared before connect."""
     client = ClientMock(mock_class)
@@ -112,7 +112,7 @@ async def test_connect_clears_stale_events(mock_class, hass: HomeAssistant):
     assert config_entry.state == config_entries.ConfigEntryState.SETUP_RETRY
 
 
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def test_duplicate_session_end_suppression(mock_class, hass: HomeAssistant):
     """Test that duplicate unexpected session_end calls only schedule a single refresh."""
     from custom_components.nefiteasy.const import STATE_CONNECTION_VERIFIED, STATE_INIT
@@ -127,32 +127,42 @@ async def test_duplicate_session_end_suppression(mock_class, hass: HomeAssistant
     await hass.async_block_till_done()
 
     coordinator = hass.data["nefiteasy"][config_entry.entry_id]["client"]
-    assert coordinator.connected_state == STATE_CONNECTION_VERIFIED
+    connection = coordinator.connection
+    assert connection.connected_state == STATE_CONNECTION_VERIFIED
 
     with patch.object(coordinator, "async_refresh") as mock_refresh:
         # First unexpected disconnect
-        await coordinator.session_end_callback()
-        assert coordinator.connected_state == STATE_INIT
+        await connection.session_end_callback()
+        assert connection.connected_state == STATE_INIT
         assert mock_refresh.call_count == 1
 
         # Duplicate unexpected disconnect arriving immediately after
-        await coordinator.session_end_callback()
+        await connection.session_end_callback()
         assert mock_refresh.call_count == 1
 
 
-@patch("custom_components.nefiteasy.NefitCore")
-async def test_connect_cancellation_resets_is_connecting(
-    mock_class, hass: HomeAssistant
-):
-    """Test that cancellation during connect resets is_connecting."""
+@patch("custom_components.nefiteasy.connection.NefitCore")
+async def test_connect_cancellation_resets_is_connecting(mock_class):
+    """Test that cancellation during connect resets is_connecting.
+
+    The connection needs no Home Assistant instance.
+    """
     import pytest
 
-    from custom_components.nefiteasy import NefitEasy
+    from custom_components.nefiteasy.connection import NefitConnection
 
     client = ClientMock(mock_class)
     mock_class.return_value = client
 
-    coordinator = NefitEasy(hass, entry_data)
+    async def message_callback(data):
+        pass
+
+    async def auth_failed_callback(event):
+        pass
+
+    connection = NefitConnection(
+        entry_data, message_callback, lambda: None, auth_failed_callback
+    )
 
     async def cancelled_wait():
         raise asyncio.CancelledError
@@ -160,6 +170,6 @@ async def test_connect_cancellation_resets_is_connecting(
     client.xmppclient.connected_event.wait = cancelled_wait
 
     with pytest.raises(asyncio.CancelledError):
-        await coordinator.connect()
+        await connection.connect()
 
-    assert not coordinator.is_connecting
+    assert not connection.is_connecting
