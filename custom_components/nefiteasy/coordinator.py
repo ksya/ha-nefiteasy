@@ -9,11 +9,12 @@ import re
 from typing import Any
 
 from aionefit import NefitCore
+from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .connection import NefitConnection
-from .const import DOMAIN, STATE_INIT, short
+from .connection import NefitConnection, NefitNotConnected
+from .const import DOMAIN, STATE_ERROR_AUTH, short
 from .models import NefitEntityDescription
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,6 +29,9 @@ class NefitEasy(DataUpdateCoordinator):
 
         self._data: dict[str, Any] = {}  # stores device states and values
         self._lock = asyncio.Lock()
+        # Scheduled polls and session_end-triggered refreshes must not overlap,
+        # otherwise one would replace the session the other is using.
+        self._update_lock = asyncio.Lock()
         self.hass = hass
         self._config = config
 
@@ -53,7 +57,10 @@ class NefitEasy(DataUpdateCoordinator):
 
     @property
     def nefit(self) -> NefitCore:
-        """The NefitCore client, for entities that send commands."""
+        """The current session's NefitCore client, for entities that send commands.
+
+        Look it up on each use: the client is replaced on every reconnect.
+        """
         return self.connection.nefit
 
     async def add_key(self, entity_description: NefitEntityDescription) -> None:
@@ -74,13 +81,15 @@ class NefitEasy(DataUpdateCoordinator):
     async def _auth_failed(self, event: str) -> None:
         """Tell the user and start reauthentication."""
         if event == "auth_error_password":
-            self.hass.components.persistent_notification.create(
+            persistent_notification.async_create(
+                self.hass,
                 f"Invalid password for connecting {self.serial} to Bosch cloud.",
                 title="Nefit password error",
                 notification_id="nefit_password_error",
             )
         else:
-            self.hass.components.persistent_notification.create(
+            persistent_notification.async_create(
+                self.hass,
                 f"Invalid credentials (serial or accesskey) for connecting {self.serial} to Bosch cloud.",
                 title="Nefit authentication error",
                 notification_id="nefit_logon_error",
@@ -123,33 +132,58 @@ class NefitEasy(DataUpdateCoordinator):
             self.async_set_updated_data(self._data)
 
     async def _async_update_data(self) -> dict[str, Any]:
-        """Update data via library."""
-        if not self.connection.verified:
-            _LOGGER.debug("Starting reconnect procedure.")
-            await self.connection.connect()
-            if not self.connection.verified:
-                raise UpdateFailed("Nefit easy not connected!")
-
-        async with self._lock:
+        """Connect if needed and poll; reconnect and retry once if a request fails."""
+        async with self._update_lock:
+            await self._async_ensure_connected()
             try:
-                _url = "/ecus/rrc/uiStatus"
-                await self.connection.async_get(_url)
-
-                for _url in self._urls:
-                    await self.connection.async_get(_url)
-            except Exception as ex:
-                _LOGGER.warning(
-                    "Nefit Easy communication error on %s, resetting "
-                    "connection state: %r",
-                    _url,
-                    ex,
+                await self._async_poll()
+            except _PollError as err:
+                if (
+                    self.connection.connected_state == STATE_ERROR_AUTH
+                    or self.connection.expected_end
+                ):
+                    raise UpdateFailed(
+                        f"Error communicating with Nefit Easy on {err.url}: "
+                        f"{err.error!r}"
+                    ) from err
+                # A late or lost reply: reconnect and retry once within this
+                # cycle so entities do not flap to unavailable. During a backend
+                # outage the retry fails too and the next update tries again.
+                _LOGGER.info(
+                    "Nefit Easy no response on %s (%r); reconnecting and retrying",
+                    err.url,
+                    err.error,
                 )
-                self.connection.connected_state = STATE_INIT
-                raise UpdateFailed(
-                    f"Error communicating with Nefit Easy on {_url}: {ex!r}"
-                ) from ex
+                self.connection.mark_lost()
+                await self._async_ensure_connected()
+                try:
+                    await self._async_poll()
+                except _PollError as retry_err:
+                    self.connection.mark_lost()
+                    raise UpdateFailed(
+                        f"Error communicating with Nefit Easy on {retry_err.url}: "
+                        f"{retry_err.error!r}"
+                    ) from retry_err
 
         return self._data
+
+    async def _async_ensure_connected(self) -> None:
+        try:
+            await self.connection.async_ensure_connected()
+        except NefitNotConnected as ex:
+            raise UpdateFailed(f"Nefit Easy {ex}") from ex
+
+    async def _async_poll(self) -> None:
+        async with self._lock:
+            _url = "/ecus/rrc/uiStatus"
+            try:
+                await self.connection.async_get(_url)
+
+                # Snapshot: an entity added while we poll must not change the dict.
+                for _url in list(self._urls):
+                    await self.connection.async_get(_url)
+            except Exception as ex:
+                raise _PollError(_url, ex) from ex
 
     async def async_init_presence(self, endpoint: str, index: int) -> Any:
         """Init presence detection."""
@@ -167,4 +201,18 @@ class NefitEasy(DataUpdateCoordinator):
 
     async def update_ui_status_later(self, delay: float) -> None:
         """Force update of uiStatus after delay."""
-        self.hass.loop.call_later(delay, self.nefit.get, "/ecus/rrc/uiStatus")
+        # The session may have been replaced or be down by the time the timer
+        # fires, so look the client up then, and don't raise inside the loop.
+        self.hass.loop.call_later(
+            delay, self.connection.get_quietly, "/ecus/rrc/uiStatus"
+        )
+
+
+class _PollError(Exception):
+    """A poll request failed; carries the URL for logging."""
+
+    def __init__(self, url: str, error: Exception) -> None:
+        """Keep the URL and the original error."""
+        super().__init__(url, error)
+        self.url = url
+        self.error = error
