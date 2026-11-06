@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from types import MappingProxyType
 from typing import Any
@@ -10,6 +11,7 @@ from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+import slixmpp
 
 from . import NefitEasy
 from .const import DOMAIN, SWITCHES
@@ -63,7 +65,19 @@ async def setup_home_entrance_detection(
     """Home entrance detection setup."""
     for i in range(0, 10):
         endpoint = "/ecus/rrc/homeentrancedetection"
-        name = await client.async_init_presence(endpoint, i)
+        try:
+            name = await client.async_init_presence(endpoint, i)
+        except (
+            asyncio.TimeoutError,
+            slixmpp.xmlstream.xmlstream.NotConnectedError,
+        ) as ex:
+            # Raising here would abort the whole switch platform (hot water, UI
+            # lock, ...), not just presence. Keep the profiles found so far; the
+            # rest appear on the next reload once the backend responds again.
+            _LOGGER.warning(
+                "Nefit Easy presence profiles from %s on not loaded (%r)", i, ex
+            )
+            break
 
         if name is not None:
             description = NefitSwitchEntityDescription(
