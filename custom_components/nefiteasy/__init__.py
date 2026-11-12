@@ -53,9 +53,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             f"state: {client.connected_state}"
         )
 
-    await hass.config_entries.async_forward_entry_setups(entry, DOMAINS)
-
+    # Fetch uiStatus before the platforms add their entities, so they never see
+    # coordinator.data as None.
     await client.async_refresh()
+
+    await hass.config_entries.async_forward_entry_setups(entry, DOMAINS)
 
     return True
 
