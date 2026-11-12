@@ -11,8 +11,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import NefitEasy
 from .const import DOMAIN, SELECTS
+from .coordinator import NefitEasy
 from .models import NefitSelectEntityDescription
 from .nefit_entity import NefitEntity
 

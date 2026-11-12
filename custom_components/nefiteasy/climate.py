@@ -19,7 +19,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import NefitEasy
 from .const import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
@@ -28,6 +27,7 @@ from .const import (
     CONF_TEMP_STEP,
     DOMAIN,
 )
+from .coordinator import NefitEasy
 
 _LOGGER = logging.getLogger(__name__)
 
