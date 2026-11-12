@@ -19,7 +19,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import NefitEasy
+from .connection import REQUEST_TIMEOUT
 from .const import (
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
@@ -28,6 +28,7 @@ from .const import (
     CONF_TEMP_STEP,
     DOMAIN,
 )
+from .coordinator import NefitEasy
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -166,7 +167,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
 
         self._client.nefit.set_usermode(new_mode)
         await asyncio.wait_for(
-            self._client.nefit.xmppclient.message_event.wait(), timeout=9
+            self._client.nefit.xmppclient.message_event.wait(), timeout=REQUEST_TIMEOUT
         )
         self._client.nefit.xmppclient.message_event.clear()
 
@@ -179,7 +180,7 @@ class NefitThermostat(CoordinatorEntity, ClimateEntity):
         _LOGGER.debug("set_temperature called (temperature=%s)", temperature)
         self._client.nefit.set_temperature(temperature)
         await asyncio.wait_for(
-            self._client.nefit.xmppclient.message_event.wait(), timeout=9
+            self._client.nefit.xmppclient.message_event.wait(), timeout=REQUEST_TIMEOUT
         )
         self._client.nefit.xmppclient.message_event.clear()
 

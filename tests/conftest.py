@@ -2,13 +2,23 @@
 
 import asyncio
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.helpers import entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, load_fixture
 
 from custom_components.nefiteasy.const import SWITCHES
+
+
+@pytest.fixture(autouse=True)
+def backend_reachable():
+    """Skip the real TCP check against the Bosch host before each login."""
+    with patch(
+        "custom_components.nefiteasy.connection.NefitConnection._async_backend_reachable",
+        new=AsyncMock(return_value=True),
+    ):
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -106,7 +116,7 @@ async def nefit_number_wrapper(nefit_config, hass):
 
 
 @pytest.fixture
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def nefit_wrapper(nefit_mock, hass, nefit_config):
     """Setups a nefiteasy wrapper with mocked device."""
     config_entry = nefit_config
@@ -121,7 +131,7 @@ async def nefit_wrapper(nefit_mock, hass, nefit_config):
 
 
 @pytest.fixture
-@patch("custom_components.nefiteasy.NefitCore")
+@patch("custom_components.nefiteasy.connection.NefitCore")
 async def nefit_wrapper_precense(nefit_mock, hass, nefit_config):
     """Setups a nefiteasy wrapper with mocked device."""
     config_entry = nefit_config
